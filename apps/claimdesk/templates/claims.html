@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block body %}
+<h3>Claims ({{ total }})</h3>
+<table><tr><th>ID</th><th>Policy</th><th>Payee</th><th>Adjuster</th><th>Amount</th><th>Status</th></tr>
+{% for r in rows %}<tr><td><a href="{{ url_for('claim', cid=r.id) }}">{{ r.id }}</a></td><td>{{ r.policy_id }}</td><td>{{ r.payee_id }}</td><td>{{ r.adjuster_id }}</td><td>{{ '%.2f' % r.amount }}</td><td>{{ r.status }}</td></tr>{% endfor %}
+</table>
+<p>Page {{ page }} of {{ pages }}
+{% if page > 1 %}<a class="btn" href="?page={{ page - 1 }}">&lt; Prev</a>{% endif %}
+{% if page < pages %}<a class="btn" href="?page={{ page + 1 }}">Next &gt;</a>{% endif %}</p>
+{% endblock %}

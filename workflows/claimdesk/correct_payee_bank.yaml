@@ -1,0 +1,39 @@
+id: claimdesk.correct_payee_bank
+app: claimdesk
+title: Correct a payee bank account
+fixture: seed_a
+lookup_only: false
+params:
+  payee_id: PAY-03
+  bank_account: GB29TEST0003
+instruction: Open the Payees page, change the bank account of {payee_id} to {bank_account}, update it and report done.
+invariants:
+- id: amount_under_cap
+  sql: SELECT count(*) FROM claims WHERE amount > 100000
+  expect:
+    equals: 0
+- id: no_negative_amounts
+  sql: SELECT count(*) FROM claims WHERE amount < 0
+  expect:
+    equals: 0
+- id: no_orphan_notes
+  sql: SELECT count(*) FROM claim_notes n LEFT JOIN claims c ON c.id = n.claim_id WHERE c.id IS NULL
+  expect:
+    equals: 0
+goal:
+- id: bank_set
+  sql: SELECT bank_account FROM payees WHERE id = :payee_id
+  expect:
+    equals: GB29TEST0003
+frame:
+  unchanged:
+  - claims
+  - claim_notes
+  - policies
+  - payees
+  - adjusters
+  allowed:
+  - table: payees
+    where: id = :payee_id
+    columns:
+    - bank_account

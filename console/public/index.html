@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Savepoint console</title>
+<meta name="description" content="Replay of Savepoint runs: checkpoints, rollbacks and benchmark results.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">SAVEPOINT</div>
+  <nav id="nav" aria-label="Views">
+    <button class="tab" data-view="runs">Runs</button>
+    <button class="tab" data-view="benchmark">Benchmark</button>
+    <button class="tab" data-view="workflows">Workflows</button>
+  </nav>
+  <div id="meta" class="meta"></div>
+</header>
+<section id="summary" class="summary" aria-label="Headline numbers"></section>
+<main id="view" tabindex="-1"></main>
+<script src="data/bundle.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

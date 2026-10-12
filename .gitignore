@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+.env
+*.pyc
+.pytest_cache/
+.ruff_cache/
+node_modules/
+dist/
+runs/
+.cd_smoke.db
+ledger*.db
+traces*.jsonl
+artifacts/
+bench*.log
+smoke.db
+.coverage

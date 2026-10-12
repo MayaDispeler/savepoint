@@ -1,0 +1,13 @@
+# Optional Postgres ledger (needs Docker). The default ledger is SQLite (sqlite:///ledger.db).
+# Use it with: LEDGER_URL=postgresql+psycopg://savepoint:savepoint@localhost:5433/ledger
+services:
+  ledger:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: savepoint
+      POSTGRES_PASSWORD: savepoint
+      POSTGRES_DB: ledger
+    ports: ["5433:5432"]
+    volumes: ["ledger-data:/var/lib/postgresql/data"]
+volumes:
+  ledger-data:

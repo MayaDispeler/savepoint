@@ -1,0 +1,34 @@
+id: claimdesk.lookup_total
+app: claimdesk
+title: Look up a claim total (lookup only)
+fixture: seed_a
+lookup_only: true
+params:
+  claim_id: CL-10428
+instruction: Open claim {claim_id}, read its amount, change nothing and report done.
+invariants:
+- id: amount_under_cap
+  sql: SELECT count(*) FROM claims WHERE amount > 100000
+  expect:
+    equals: 0
+- id: no_negative_amounts
+  sql: SELECT count(*) FROM claims WHERE amount < 0
+  expect:
+    equals: 0
+- id: no_orphan_notes
+  sql: SELECT count(*) FROM claim_notes n LEFT JOIN claims c ON c.id = n.claim_id WHERE c.id IS NULL
+  expect:
+    equals: 0
+goal:
+- id: claim_unchanged
+  sql: SELECT amount FROM claims WHERE id = :claim_id
+  expect:
+    equals: 455.5
+frame:
+  unchanged:
+  - claims
+  - claim_notes
+  - policies
+  - payees
+  - adjusters
+  allowed: []

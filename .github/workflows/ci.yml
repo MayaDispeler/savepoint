@@ -1,0 +1,13 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync
+      - run: uv run playwright install --with-deps chromium
+      - run: uv run ruff check .
+      # No ANTHROPIC_API_KEY in CI (NFR07): tests use recorded responses and the scripted agent only.
+      - run: uv run pytest -q --cov=savepoint/runtime --cov=savepoint/contracts --cov=savepoint/snapshot --cov-report=term-missing

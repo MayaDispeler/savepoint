@@ -1,0 +1,6 @@
+{% extends "base.html" %}{% block body %}
+<h3>Payees</h3>
+<table><tr><th>ID</th><th>Name</th><th>Bank account</th><th></th></tr>
+{% for r in rows %}<tr><td>{{ r.id }}</td><td>{{ r.name }}</td>
+<td colspan="2"><form method="post" action="{{ url_for('update_payee', pid=r.id) }}"><input name="bank_account" value="{{ r.bank_account }}"> <button type="submit">Update</button></form></td></tr>{% endfor %}
+</table>{% endblock %}

@@ -1,0 +1,7 @@
+{
+  // Static replay console on Cloudflare Worker static assets. Deploy: `npx wrangler deploy` from this folder,
+  // or connect the GitHub repo in Workers Builds. Route it at iamsrihari.com/projects/savepoint/demo*.
+  "name": "savepoint-demo",
+  "compatibility_date": "2026-10-01",
+  "assets": { "directory": "../console/public", "not_found_handling": "single-page-application" }
+}

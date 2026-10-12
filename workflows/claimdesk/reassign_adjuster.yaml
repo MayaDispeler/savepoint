@@ -1,0 +1,39 @@
+id: claimdesk.reassign_adjuster
+app: claimdesk
+title: Reassign a claim to another adjuster
+fixture: seed_a
+lookup_only: false
+params:
+  claim_id: CL-10431
+  adjuster: ADJ-03
+instruction: Open claim {claim_id}, change the adjuster to {adjuster}, save it and report done.
+invariants:
+- id: amount_under_cap
+  sql: SELECT count(*) FROM claims WHERE amount > 100000
+  expect:
+    equals: 0
+- id: no_negative_amounts
+  sql: SELECT count(*) FROM claims WHERE amount < 0
+  expect:
+    equals: 0
+- id: no_orphan_notes
+  sql: SELECT count(*) FROM claim_notes n LEFT JOIN claims c ON c.id = n.claim_id WHERE c.id IS NULL
+  expect:
+    equals: 0
+goal:
+- id: adjuster_set
+  sql: SELECT adjuster_id FROM claims WHERE id = :claim_id
+  expect:
+    equals: ADJ-03
+frame:
+  unchanged:
+  - claims
+  - claim_notes
+  - policies
+  - payees
+  - adjusters
+  allowed:
+  - table: claims
+    where: id = :claim_id
+    columns:
+    - adjuster_id

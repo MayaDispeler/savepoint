@@ -1,0 +1,39 @@
+id: claimdesk.reopen_claim
+app: claimdesk
+title: Reopen a paid claim
+fixture: seed_a
+lookup_only: false
+params:
+  claim_id: CL-10433
+  status: open
+instruction: Open claim {claim_id}, set the status to {status}, save it and report done.
+invariants:
+- id: amount_under_cap
+  sql: SELECT count(*) FROM claims WHERE amount > 100000
+  expect:
+    equals: 0
+- id: no_negative_amounts
+  sql: SELECT count(*) FROM claims WHERE amount < 0
+  expect:
+    equals: 0
+- id: no_orphan_notes
+  sql: SELECT count(*) FROM claim_notes n LEFT JOIN claims c ON c.id = n.claim_id WHERE c.id IS NULL
+  expect:
+    equals: 0
+goal:
+- id: status_set
+  sql: SELECT status FROM claims WHERE id = :claim_id
+  expect:
+    equals: open
+frame:
+  unchanged:
+  - claims
+  - claim_notes
+  - policies
+  - payees
+  - adjusters
+  allowed:
+  - table: claims
+    where: id = :claim_id
+    columns:
+    - status

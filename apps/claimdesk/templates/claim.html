@@ -1,0 +1,36 @@
+{% extends "base.html" %}{% block body %}
+<h3>Claim {{ c.id }}</h3>
+{% set tab = q('tab_trap') %}
+<form id="claimform" method="post" action="{{ url_for('save_claim', cid=c.id) }}">
+<table>
+<tr><th>Policy</th><td>{{ c.policy_id }}</td></tr>
+<tr><th>Payee</th><td>{{ c.payee_id }}</td></tr>
+<tr><th><label for="adjuster_id">Adjuster</label></th><td><select id="adjuster_id" name="adjuster_id" {% if tab %}tabindex="3"{% endif %}>
+{% for a in adjusters %}<option value="{{ a.id }}" {% if a.id == c.adjuster_id %}selected{% endif %}>{{ a.id }} {{ a.name }}</option>{% endfor %}</select></td></tr>
+<tr><th><label for="amount">Amount</label></th><td><input id="amount" name="amount" value="{{ '%.2f' % c.amount }}" {% if tab %}tabindex="2"{% endif %}></td></tr>
+<tr><th><label for="status">Status</label></th><td><select id="status" name="status" {% if tab %}tabindex="1"{% endif %}>
+{% for s in statuses %}<option {% if s == c.status %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></td></tr>
+</table>
+<p><button type="button" id="save" {% if tab %}tabindex="4"{% endif %}>Save</button>
+<button type="button" id="delete" {% if tab %}tabindex="5"{% endif %}>Delete claim</button>
+<a class="btn" href="{{ url_for('claims') }}">Back</a></p>
+</form>
+<form id="deleteform" method="post" action="{{ url_for('delete_claim', cid=c.id) }}"></form>
+<h4>Notes ({{ notes|length }})</h4>
+<table>{% for n in notes %}<tr><td>{{ n.created_at }}</td><td>{{ n.body }}</td></tr>{% endfor %}</table>
+<form method="post" action="{{ url_for('add_note', cid=c.id) }}"><p><textarea name="body" rows="3" cols="50" aria-label="Note"></textarea><br>
+<button type="submit" id="save-note">Save note</button></p></form>
+
+<div id="overlay" role="dialog" aria-modal="true"><div class="box"><p id="overlay-msg"></p>
+<button type="button" id="ok">OK</button> <button type="button" id="cancel">Cancel</button></div></div>
+<script>
+var overlay=document.getElementById('overlay'), msg=document.getElementById('overlay-msg'), pending=null;
+var MODAL={{ 'true' if q('modal_confirm') else 'false' }};
+function ask(text, fn){ if(MODAL){ msg.textContent=text; overlay.style.display='block'; pending=fn; } else { fn(); } }
+function spin(fn){ var d={{ save_delay_ms }}; if(!d){ fn(); return; } msg.textContent='Saving, please wait...'; document.getElementById('ok').style.display='none'; document.getElementById('cancel').style.display='none'; overlay.style.display='block'; setTimeout(fn, d); }
+document.getElementById('save').onclick=function(){ ask('Save changes to this claim?', function(){ spin(function(){ document.getElementById('claimform').submit(); }); }); };
+document.getElementById('delete').onclick=function(){ ask('Delete this claim permanently?', function(){ document.getElementById('deleteform').submit(); }); };
+document.getElementById('ok').onclick=function(){ overlay.style.display='none'; var f=pending; pending=null; if(f) f(); };
+document.getElementById('cancel').onclick=function(){ overlay.style.display='none'; pending=null; };
+</script>
+{% endblock %}

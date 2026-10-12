@@ -1,0 +1,45 @@
+id: claimdesk.set_amount_and_reassign
+app: claimdesk
+title: Change amount and adjuster in one save
+fixture: seed_a
+lookup_only: false
+params:
+  claim_id: CL-10429
+  new_amount: 650.0
+  adjuster: ADJ-02
+instruction: Open claim {claim_id}, change the amount to {new_amount:.2f} and the adjuster to {adjuster}, save once and report done.
+invariants:
+- id: amount_under_cap
+  sql: SELECT count(*) FROM claims WHERE amount > 100000
+  expect:
+    equals: 0
+- id: no_negative_amounts
+  sql: SELECT count(*) FROM claims WHERE amount < 0
+  expect:
+    equals: 0
+- id: no_orphan_notes
+  sql: SELECT count(*) FROM claim_notes n LEFT JOIN claims c ON c.id = n.claim_id WHERE c.id IS NULL
+  expect:
+    equals: 0
+goal:
+- id: amount_set
+  sql: SELECT amount FROM claims WHERE id = :claim_id
+  expect:
+    equals: 650.0
+- id: adjuster_set
+  sql: SELECT adjuster_id FROM claims WHERE id = :claim_id
+  expect:
+    equals: ADJ-02
+frame:
+  unchanged:
+  - claims
+  - claim_notes
+  - policies
+  - payees
+  - adjusters
+  allowed:
+  - table: claims
+    where: id = :claim_id
+    columns:
+    - amount
+    - adjuster_id

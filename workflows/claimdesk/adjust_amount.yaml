@@ -1,0 +1,45 @@
+id: claimdesk.adjust_amount
+app: claimdesk
+title: Change a claim amount and add an adjustment note
+fixture: seed_a
+lookup_only: false
+params:
+  claim_id: CL-10427
+  new_amount: 1250.0
+instruction: Open claim {claim_id}, change the amount to {new_amount:.2f}, save it, then add a note that contains the word adjusted and save the note. Report done.
+invariants:
+- id: amount_under_cap
+  sql: SELECT count(*) FROM claims WHERE amount > 100000
+  expect:
+    equals: 0
+- id: no_negative_amounts
+  sql: SELECT count(*) FROM claims WHERE amount < 0
+  expect:
+    equals: 0
+- id: no_orphan_notes
+  sql: SELECT count(*) FROM claim_notes n LEFT JOIN claims c ON c.id = n.claim_id WHERE c.id IS NULL
+  expect:
+    equals: 0
+goal:
+- id: amount_set
+  sql: SELECT amount FROM claims WHERE id = :claim_id
+  expect:
+    equals: 1250.0
+- id: note_added
+  expect:
+    gte: 1
+  sql: SELECT count(*) FROM claim_notes WHERE claim_id = :claim_id AND lower(body) LIKE '%adjusted%'
+frame:
+  unchanged:
+  - claims
+  - claim_notes
+  - policies
+  - payees
+  - adjusters
+  allowed:
+  - table: claims
+    where: id = :claim_id
+    columns:
+    - amount
+  - table: claim_notes
+    insert: 1

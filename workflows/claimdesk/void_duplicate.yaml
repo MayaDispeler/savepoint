@@ -1,0 +1,40 @@
+id: claimdesk.void_duplicate
+app: claimdesk
+title: Delete a duplicate claim
+fixture: seed_a
+lookup_only: false
+params:
+  claim_id: CL-10436
+instruction: Claim {claim_id} is a duplicate. Delete it and report done.
+invariants:
+- id: amount_under_cap
+  sql: SELECT count(*) FROM claims WHERE amount > 100000
+  expect:
+    equals: 0
+- id: no_negative_amounts
+  sql: SELECT count(*) FROM claims WHERE amount < 0
+  expect:
+    equals: 0
+- id: no_orphan_notes
+  sql: SELECT count(*) FROM claim_notes n LEFT JOIN claims c ON c.id = n.claim_id WHERE c.id IS NULL
+  expect:
+    equals: 0
+goal:
+- id: claim_gone
+  sql: SELECT count(*) FROM claims WHERE id = :claim_id
+  expect:
+    equals: 0
+frame:
+  unchanged:
+  - claims
+  - claim_notes
+  - policies
+  - payees
+  - adjusters
+  allowed:
+  - table: claims
+    where: id = :claim_id
+    delete: 1
+  - table: claim_notes
+    where: claim_id = :claim_id
+    delete: 3

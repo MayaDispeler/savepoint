@@ -1,0 +1,36 @@
+id: claimdesk.add_note_only
+app: claimdesk
+title: Add a review note to a claim
+fixture: seed_a
+lookup_only: false
+params:
+  claim_id: CL-10428
+instruction: Open claim {claim_id}, add a note that contains the word reviewed, save the note and report done.
+invariants:
+- id: amount_under_cap
+  sql: SELECT count(*) FROM claims WHERE amount > 100000
+  expect:
+    equals: 0
+- id: no_negative_amounts
+  sql: SELECT count(*) FROM claims WHERE amount < 0
+  expect:
+    equals: 0
+- id: no_orphan_notes
+  sql: SELECT count(*) FROM claim_notes n LEFT JOIN claims c ON c.id = n.claim_id WHERE c.id IS NULL
+  expect:
+    equals: 0
+goal:
+- id: note_added
+  expect:
+    gte: 1
+  sql: SELECT count(*) FROM claim_notes WHERE claim_id = :claim_id AND lower(body) LIKE '%reviewed%'
+frame:
+  unchanged:
+  - claims
+  - claim_notes
+  - policies
+  - payees
+  - adjusters
+  allowed:
+  - table: claim_notes
+    insert: 1
