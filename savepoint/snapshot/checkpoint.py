@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from time import monotonic, time_ns
 
-from savepoint.snapshot import browser, files, sqlite
+from savepoint.snapshot import browser, files
 from savepoint.snapshot.digest import Digest, diff
 
 
@@ -45,8 +45,8 @@ def digest_sha256(d: Digest) -> str:
 def take(adapter, run_id: str, step: int, kind: str, root: str, page=None) -> Checkpoint:
     t0 = monotonic()
     cp_dir = Path(root) / run_id / f"cp-{step}"
-    db_snap = str(cp_dir / "db.sqlite")
-    size = sqlite.backup(adapter.db_path, db_snap)
+    db_snap = str(cp_dir / "db.snapshot")
+    size = adapter.snapshot_db(db_snap)
     files_snap = None
     if adapter.files_dir:
         files_snap = str(cp_dir / "files.tar.gz")
@@ -62,7 +62,7 @@ def take(adapter, run_id: str, step: int, kind: str, root: str, page=None) -> Ch
 def restore(adapter, cp: Checkpoint, page_factory=None, *, skip_files: bool = False) -> RestoreResult:
     """Restore database, file volume, browser session and URL, then verify by digest compare."""
     t0 = monotonic()
-    sqlite.restore(cp.db_path, adapter.db_path)
+    adapter.restore_db(cp.db_path)
     if cp.files_path and not skip_files:  # skip_files exists only to prove the compare catches it (V11)
         files.untar_dir(cp.files_path, adapter.files_dir)
     page = None

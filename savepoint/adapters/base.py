@@ -32,6 +32,18 @@ class AppAdapter:
     def query(self, sql: str, params: dict | None = None) -> list[dict]:
         raise NotImplementedError
 
+    def select(self, sql: str, params: dict | None = None, snapshot: str | None = None) -> list[tuple]:
+        """Read-only SELECT with named params (:name). With `snapshot`, query that checkpoint's database copy
+        when the engine supports it; otherwise return no rows."""
+        raise NotImplementedError
+
+    def snapshot_db(self, dest: str) -> int:
+        """Write a consistent snapshot of the monitored data to `dest`; return its size in bytes."""
+        raise NotImplementedError
+
+    def restore_db(self, src: str) -> None:
+        raise NotImplementedError
+
     def reset(self, fixture: str) -> Digest:
         raise NotImplementedError
 
@@ -48,6 +60,18 @@ class AppAdapter:
 
 class SqliteMixin:
     db_path: str
+
+    def select(self, sql: str, params: dict | None = None, snapshot: str | None = None) -> list[tuple]:
+        from savepoint.contracts.evaluator import run_sql
+        return run_sql(snapshot or self.db_path, sql, params or {})
+
+    def snapshot_db(self, dest: str) -> int:
+        from savepoint.snapshot import sqlite
+        return sqlite.backup(self.db_path, dest)
+
+    def restore_db(self, src: str) -> None:
+        from savepoint.snapshot import sqlite
+        sqlite.restore(src, self.db_path)
 
     def query(self, sql: str, params: dict | None = None) -> list[dict]:
         con = sqlite3.connect(f"file:{self.db_path}?mode=ro", uri=True)

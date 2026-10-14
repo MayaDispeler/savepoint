@@ -70,37 +70,38 @@ def run_sql(db_path: str, sql: str, params: dict) -> list[tuple]:
         con.close()
 
 
-def _eval_checks(phase, checks, db_path, params) -> list[CheckResult]:
+def _eval_checks(phase, checks, adapter, params) -> list[CheckResult]:
     out = []
     for c in checks:
         t0 = time.monotonic()
         op, arg = next(iter(c.expect.items()))
         try:
-            ok, observed = apply_operator(op, arg, run_sql(db_path, c.sql, params))
-        except (sqlite3.Error, ValueError) as e:
+            ok, observed = apply_operator(op, arg, adapter.select(c.sql, params))
+        except Exception as e:  # noqa: BLE001 - a failing check query is a failed check, not a crash
             ok, observed = False, f"error: {e}"
         out.append(CheckResult(phase, c.id, bool(ok), observed, c.expect, int((time.monotonic() - t0) * 1000)))
     return out
 
 
-def frame_violations(contract: Contract, s0: Digest, now: Digest, s0_db: str, now_db: str) -> list[str]:
+def frame_violations(contract: Contract, s0: Digest, now: Digest, adapter, s0_db: str | None) -> list[str]:
     """A4: remove every change the contract allows; anything left is an unexpected change."""
     d = diff({t: s0.get(t, {}) for t in contract.unchanged}, {t: now.get(t, {}) for t in contract.unchanged})
     violations = []
     for table in contract.unchanged:
         rules = [r for r in contract.allowed if r["table"] == table]
 
-        def selected(rule, db, table=table):
+        def selected(rule, snapshot, table=table):
             where = rule.get("where")
             if not where:
                 return set()
-            pk = "id"
-            return {str(r[0]) for r in run_sql(db, f"SELECT {pk} FROM {table} WHERE {where}", contract.params)}
+            pk = adapter.monitored_tables.get(table, "id")
+            rows = adapter.select(f"SELECT {pk} FROM {table} WHERE {where}", contract.params, snapshot=snapshot)
+            return {str(r[0]) for r in rows}
 
         for pk, cols in sorted(d.changed.get(table, {}).items()):
             ok = False
             for r in rules:
-                if (pk in selected(r, s0_db) | selected(r, now_db)) and set(cols) <= set(r.get("columns", [])):
+                if (pk in selected(r, s0_db) | selected(r, None)) and set(cols) <= set(r.get("columns", [])):
                     ok = True
             if not ok:
                 violations.append(f"unexpected change {table}[{pk}].{','.join(cols)}")
@@ -115,14 +116,13 @@ def frame_violations(contract: Contract, s0: Digest, now: Digest, s0_db: str, no
 
 def check(contract: Contract, phase: str, adapter, s0: Digest | None = None,
           s0_db: str | None = None) -> list[CheckResult]:
-    db = adapter.db_path
     if phase == "invariant":
-        return _eval_checks("invariant", contract.invariants, db, contract.params)
+        return _eval_checks("invariant", contract.invariants, adapter, contract.params)
     if phase == "goal":
-        return _eval_checks("goal", contract.goal, db, contract.params)
+        return _eval_checks("goal", contract.goal, adapter, contract.params)
     if phase == "frame":
         t0 = time.monotonic()
-        v = frame_violations(contract, s0, adapter.digest(), s0_db, db)
+        v = frame_violations(contract, s0, adapter.digest(), adapter, s0_db)
         return [CheckResult("frame", "frame", not v, v, "no unexpected change",
                             int((time.monotonic() - t0) * 1000))]
     raise ValueError(phase)
