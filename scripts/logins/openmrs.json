@@ -1,0 +1,6 @@
+[{"type":"goto","url":"http://localhost:8080/openmrs/login.htm"},
+ {"type":"fill","selector":"#username","value":"admin"},
+ {"type":"fill","selector":"#password","value":"Admin123"},
+ {"type":"click","selector":"#sessionLocation li:first-child"},
+ {"type":"click","selector":"#loginButton"},
+ {"type":"wait","ms":3000}]
