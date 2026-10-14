@@ -1,0 +1,47 @@
+id: openmrs.update_family_name
+app: openmrs
+title: Correct a patient's family name
+fixture: seed_a
+lookup_only: false
+params:
+  patient_id: 7
+  family: Rao-Menon
+instruction: Open the registration summary of patient {patient_id}, change the family name to {family}, confirm and report done.
+invariants:
+- id: identifiers_unique
+  expect:
+    equals: 0
+  sql: SELECT count(*) FROM (SELECT identifier FROM patient_identifier WHERE voided = 0 GROUP BY identifier HAVING count(*) > 1) d
+- id: no_orphan_names
+  expect:
+    equals: 0
+  sql: SELECT count(*) FROM person_name n LEFT JOIN person p ON p.person_id = n.person_id WHERE p.person_id IS NULL
+goal:
+- id: family_set
+  expect:
+    equals: Rao-Menon
+  sql: SELECT family_name FROM person_name WHERE person_id = :patient_id AND voided = 0
+frame:
+  unchanged:
+  - person
+  - person_name
+  - person_address
+  - person_attribute
+  - patient
+  - patient_identifier
+  - visit
+  - encounter
+  - obs
+  - allergy
+  - allergy_reaction
+  - relationship
+  allowed:
+  - table: person_name
+    where: person_id = :patient_id
+    columns:
+    - voided
+    - voided_by
+    - date_voided
+    - void_reason
+    - changed_by
+    insert: 1

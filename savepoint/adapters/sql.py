@@ -71,7 +71,7 @@ class SqlAdapter(AppAdapter):
         return Path(dest).stat().st_size
 
     def restore_db(self, src: str) -> None:
-        data = pickle.loads(Path(src).read_bytes())  # noqa: S301 - our own snapshot file
+        data = pickle.loads(Path(src).read_bytes())
         with self.engine.begin() as conn:
             if self.dialect == "mysql":
                 conn.execute(text("SET FOREIGN_KEY_CHECKS=0"))
@@ -87,6 +87,9 @@ class SqlAdapter(AppAdapter):
                     ph = ", ".join(f":{c}" for c in cols)
                     conn.execute(text(f"INSERT INTO {table} ({q}) VALUES ({ph})"), rows)
             if self.dialect == "mysql":
+                for table, pk in self.monitored_tables.items():
+                    nxt = conn.execute(text(f"SELECT COALESCE(MAX({pk}), 0) + 1 FROM {table}")).scalar()
+                    conn.execute(text(f"ALTER TABLE {table} AUTO_INCREMENT = {int(nxt)}"))
                 conn.execute(text("SET FOREIGN_KEY_CHECKS=1"))
             else:
                 conn.execute(text("SET session_replication_role = DEFAULT"))

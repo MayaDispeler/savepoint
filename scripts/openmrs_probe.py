@@ -1,5 +1,6 @@
 """Probe: complete the OpenMRS registration wizard end to end, report selectors and the resulting URL."""
 import json
+
 from playwright.sync_api import sync_playwright
 
 B = "http://localhost:8080/openmrs"

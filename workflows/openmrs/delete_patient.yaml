@@ -1,0 +1,72 @@
+id: openmrs.delete_patient
+app: openmrs
+title: Delete a duplicate patient record
+fixture: seed_a
+lookup_only: false
+params:
+  patient_id: 10
+instruction: Patient {patient_id} is a duplicate. Delete the patient record with the reason 'duplicate record' and report done.
+invariants:
+- id: identifiers_unique
+  expect:
+    equals: 0
+  sql: SELECT count(*) FROM (SELECT identifier FROM patient_identifier WHERE voided = 0 GROUP BY identifier HAVING count(*) > 1) d
+- id: no_orphan_names
+  expect:
+    equals: 0
+  sql: SELECT count(*) FROM person_name n LEFT JOIN person p ON p.person_id = n.person_id WHERE p.person_id IS NULL
+goal:
+- id: patient_voided
+  expect:
+    equals: 1
+  sql: SELECT voided FROM patient WHERE patient_id = :patient_id
+frame:
+  unchanged:
+  - person
+  - person_name
+  - person_address
+  - person_attribute
+  - patient
+  - patient_identifier
+  - visit
+  - encounter
+  - obs
+  - allergy
+  - allergy_reaction
+  - relationship
+  allowed:
+  - table: patient
+    where: patient_id = :patient_id
+    columns:
+    - voided
+    - voided_by
+    - date_voided
+    - void_reason
+  - table: person
+    where: person_id = :patient_id
+    columns:
+    - voided
+    - voided_by
+    - date_voided
+    - void_reason
+  - table: person_name
+    where: person_id = :patient_id
+    columns:
+    - voided
+    - voided_by
+    - date_voided
+    - void_reason
+  - table: person_address
+    where: person_id = :patient_id
+    columns:
+    - voided
+    - voided_by
+    - date_voided
+    - void_reason
+  - table: patient_identifier
+    where: patient_id = :patient_id
+    columns:
+    - voided
+    - voided_by
+    - date_voided
+    - void_reason

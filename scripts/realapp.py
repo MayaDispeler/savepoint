@@ -1,0 +1,92 @@
+"""Real-app helper (OpenMRS / iDempiere). Usage:
+  realapp.py openmrs seed          register the patient cast through the UI and freeze baseline
+  realapp.py openmrs test [slug]   run each golden path, check goal + frame against its contract
+"""
+import sys
+from pathlib import Path
+
+from playwright.sync_api import sync_playwright
+
+from savepoint.agent.actuator import Actuator
+from savepoint.agent.scripted import ScriptedAgent, Terminal
+from savepoint.bench.runner import load_contracts
+from savepoint.contracts import evaluator
+from savepoint.runtime.runtime import RunContext
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def make(app):
+    if app == "openmrs":
+        from savepoint.adapters.openmrs import OpenMrsAdapter
+        return OpenMrsAdapter(), "http://localhost:8080"
+    from savepoint.adapters.idempiere import IdempiereAdapter
+    return IdempiereAdapter(), "http://localhost:8081"
+
+
+def run_steps(ctx, steps_agent):
+    page = ctx.new_page()
+    act = Actuator(page)
+    while True:
+        a = steps_agent.next_action(None)
+        if isinstance(a, Terminal):
+            return page
+        act.execute(a)
+
+
+def seed(app):
+    adapter, base = make(app)
+    from savepoint.agent import openmrs_paths as op
+    with sync_playwright() as p:
+        b = p.chromium.launch()
+        ctx = RunContext(adapter, b, base, "artifacts")
+        page = ctx.new_page()
+        act = Actuator(page)
+        cast = [("Ravi", "Menon", False), ("Meera", "Iyer", True), ("Dev", "Patel", False), ("Kiran", "Shah", False)]
+        for given, family, visit in cast:
+            steps = op.register(given, family)
+            if visit:
+                steps = steps + op.start_visit(adapter.query("SELECT MAX(patient_id) AS m FROM patient")[0]["m"] + 1)
+            for s in steps:
+                s = dict(s)
+                s.pop("commit", None)
+                s.pop("wrong", None)
+                if s["type"] == "goto":
+                    s["url"] = base + s.pop("path")
+                act.execute(s)
+        ctx.close()
+        b.close()
+    rows = adapter.query("SELECT p.patient_id, n.given_name, n.family_name FROM patient p JOIN person_name n "
+                         "ON n.person_id = p.patient_id AND n.voided = 0 ORDER BY p.patient_id")
+    print(rows)
+    print("baseline bytes", adapter.make_baseline())
+
+
+def test(app, only=None):
+    adapter, base = make(app)
+    contracts = load_contracts(str(ROOT / "workflows" / app))
+    with sync_playwright() as p:
+        b = p.chromium.launch()
+        for c, _ in contracts:
+            if only and not c.id.endswith(only):
+                continue
+            ctx = RunContext(adapter, b, base, "artifacts")
+            s0 = adapter.reset(c.fixture)
+            snap = str(ROOT / "artifacts" / "t.snapshot")
+            adapter.snapshot_db(snap)
+            agent = ScriptedAgent(c.id, c.params, "none", base_url=base)
+            try:
+                run_steps(ctx, agent)
+                g = evaluator.check(c, "goal", adapter)
+                f = evaluator.check(c, "frame", adapter, s0, snap)
+                bad = [x for x in g + f if not x.passed]
+                print(c.id, "OK" if not bad else "FAIL", [(x.check_id, x.observed) for x in bad])
+            except Exception as e:  # noqa: BLE001
+                print(c.id, "ERROR", str(e)[:300])
+            ctx.close()
+        b.close()
+
+
+if __name__ == "__main__":
+    app, cmd = sys.argv[1], sys.argv[2]
+    (seed(app) if cmd == "seed" else test(app, sys.argv[3] if len(sys.argv) > 3 else None))

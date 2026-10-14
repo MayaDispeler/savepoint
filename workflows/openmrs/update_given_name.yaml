@@ -1,0 +1,47 @@
+id: openmrs.update_given_name
+app: openmrs
+title: Correct a patient's given name
+fixture: seed_a
+lookup_only: false
+params:
+  patient_id: 7
+  given: Ashalata
+instruction: Open the registration summary of patient {patient_id}, change the given name to {given}, confirm and report done.
+invariants:
+- id: identifiers_unique
+  expect:
+    equals: 0
+  sql: SELECT count(*) FROM (SELECT identifier FROM patient_identifier WHERE voided = 0 GROUP BY identifier HAVING count(*) > 1) d
+- id: no_orphan_names
+  expect:
+    equals: 0
+  sql: SELECT count(*) FROM person_name n LEFT JOIN person p ON p.person_id = n.person_id WHERE p.person_id IS NULL
+goal:
+- id: given_set
+  expect:
+    equals: Ashalata
+  sql: SELECT given_name FROM person_name WHERE person_id = :patient_id AND voided = 0
+frame:
+  unchanged:
+  - person
+  - person_name
+  - person_address
+  - person_attribute
+  - patient
+  - patient_identifier
+  - visit
+  - encounter
+  - obs
+  - allergy
+  - allergy_reaction
+  - relationship
+  allowed:
+  - table: person_name
+    where: person_id = :patient_id
+    columns:
+    - voided
+    - voided_by
+    - date_voided
+    - void_reason
+    - changed_by
+    insert: 1

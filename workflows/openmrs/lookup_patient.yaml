@@ -1,0 +1,37 @@
+id: openmrs.lookup_patient
+app: openmrs
+title: Look up a patient (lookup only)
+fixture: seed_a
+lookup_only: true
+params:
+  patient_id: 7
+instruction: Open the dashboard of patient {patient_id}, read the patient identifier, change nothing and report done.
+invariants:
+- id: identifiers_unique
+  expect:
+    equals: 0
+  sql: SELECT count(*) FROM (SELECT identifier FROM patient_identifier WHERE voided = 0 GROUP BY identifier HAVING count(*) > 1) d
+- id: no_orphan_names
+  expect:
+    equals: 0
+  sql: SELECT count(*) FROM person_name n LEFT JOIN person p ON p.person_id = n.person_id WHERE p.person_id IS NULL
+goal:
+- id: patient_present
+  expect:
+    gte: 1
+  sql: SELECT count(*) FROM patient_identifier WHERE patient_id = :patient_id AND voided = 0
+frame:
+  unchanged:
+  - person
+  - person_name
+  - person_address
+  - person_attribute
+  - patient
+  - patient_identifier
+  - visit
+  - encounter
+  - obs
+  - allergy
+  - allergy_reaction
+  - relationship
+  allowed: []

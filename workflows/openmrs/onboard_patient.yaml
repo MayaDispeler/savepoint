@@ -1,27 +1,48 @@
-# DRAFT, not executed (needs the OpenMRS sandbox). Table and column names follow the OpenMRS 2.x schema and are unverified.
 id: openmrs.onboard_patient
 app: openmrs
 title: Register a new patient
 fixture: seed_a
-params: { given: "Asha", family: "Rao", gender: "F", birthdate: "1990-04-12", identifier: "TEST-0001" }
-instruction: >
-  Register a new patient named {given} {family}, gender {gender}, born {birthdate}, with identifier {identifier}.
-  Do not start a visit. Report done.
+lookup_only: false
+params:
+  given: Neha
+  family: Kulkarni
+instruction: Register a new patient named {given} {family}, female, born 12 April 1990, living at 12 Test Street, Pune. Do not start a visit. Report done.
 invariants:
-  - id: no_voided_new_persons
-    sql: SELECT count(*) FROM person WHERE voided = 1 AND date_created > '2026-01-01'
-    expect: { equals: 0 }
+- id: identifiers_unique
+  expect:
+    equals: 0
+  sql: SELECT count(*) FROM (SELECT identifier FROM patient_identifier WHERE voided = 0 GROUP BY identifier HAVING count(*) > 1) d
+- id: no_orphan_names
+  expect:
+    equals: 0
+  sql: SELECT count(*) FROM person_name n LEFT JOIN person p ON p.person_id = n.person_id WHERE p.person_id IS NULL
 goal:
-  - id: patient_exists
-    sql: SELECT count(*) FROM patient_identifier WHERE identifier = :identifier AND voided = 0
-    expect: { equals: 1 }
-  - id: name_set
-    sql: SELECT count(*) FROM person_name WHERE given_name = :given AND family_name = :family AND voided = 0
-    expect: { equals: 1 }
+- id: patient_registered
+  expect:
+    equals: 1
+  sql: SELECT count(*) FROM person_name n JOIN patient p ON p.patient_id = n.person_id WHERE n.given_name = :given AND n.family_name = :family AND n.voided = 0
 frame:
-  unchanged: [person, person_name, patient, patient_identifier, visit]
+  unchanged:
+  - person
+  - person_name
+  - person_address
+  - person_attribute
+  - patient
+  - patient_identifier
+  - visit
+  - encounter
+  - obs
+  - allergy
+  - allergy_reaction
+  - relationship
   allowed:
-    - { table: person, insert: 1 }
-    - { table: person_name, insert: 1 }
-    - { table: patient, insert: 1 }
-    - { table: patient_identifier, insert: 1 }
+  - table: person
+    insert: 1
+  - table: person_name
+    insert: 1
+  - table: person_address
+    insert: 1
+  - table: patient
+    insert: 1
+  - table: patient_identifier
+    insert: 1

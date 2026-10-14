@@ -32,6 +32,11 @@ class AppAdapter:
     def query(self, sql: str, params: dict | None = None) -> list[dict]:
         raise NotImplementedError
 
+    def login(self, page):
+        """Log a fresh browser page in. Default is the ClaimDesk 98 form."""
+        page.goto(self.base_url + "/login")
+        page.click("button[type=submit]")
+
     def select(self, sql: str, params: dict | None = None, snapshot: str | None = None) -> list[tuple]:
         """Read-only SELECT with named params (:name). With `snapshot`, query that checkpoint's database copy
         when the engine supports it; otherwise return no rows."""

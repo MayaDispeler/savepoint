@@ -42,8 +42,7 @@ class RunContext:
         self._contexts.append(ctx)
         page = ctx.new_page()
         if storage_state is None:
-            page.goto(self.base_url + "/login")
-            page.click("button[type=submit]")
+            self.adapter.login(page)
         return page
 
     def close(self):

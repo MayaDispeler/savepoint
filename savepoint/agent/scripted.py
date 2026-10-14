@@ -34,6 +34,12 @@ def _claim(cid):
 
 def golden_steps(workflow_id: str, p: dict) -> list[dict]:
     slug = workflow_id.split(".")[1]
+    if workflow_id.startswith("openmrs."):
+        from savepoint.agent import openmrs_paths
+        return openmrs_paths.steps(slug, p)
+    if workflow_id.startswith("idempiere."):
+        from savepoint.agent import idempiere_paths
+        return idempiere_paths.steps(slug, p)
     c = p.get("claim_id")
     if slug == "adjust_amount":
         return (_claim(c) + [{"type": "fill", "selector": "#amount", "value": f"{p['new_amount']:.2f}",
@@ -83,7 +89,7 @@ class ScriptedAgent:
         self.k = k
         self.full = golden_steps(workflow_id, params)
         self.steps = list(self.full)
-        if fault == "wrong_value" and not any("wrong" in s for s in self.steps):
+        if fault == "wrong_value" and not any("wrong" in s or "wrong_selector" in s for s in self.steps):
             self.fault = "done_early"  # lookup-only workflows have nothing to mistype
         if self.fault == "skip_save":
             self.steps = self._drop_final_save(self.steps)
@@ -114,7 +120,10 @@ class ScriptedAgent:
         s = dict(self.steps[self.i])
         if self.fault == "wrong_value" and "wrong" in s:
             s["value"] = s["wrong"]
+        if self.fault == "wrong_value" and "wrong_selector" in s:
+            s["selector"] = s["wrong_selector"]
         s.pop("wrong", None)
+        s.pop("wrong_selector", None)
         s.pop("commit", None)
         if s["type"] == "goto":
             s["url"] = self.base_url + s.pop("path")

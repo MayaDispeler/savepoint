@@ -1,0 +1,45 @@
+id: openmrs.mark_deceased
+app: openmrs
+title: Mark a patient deceased
+fixture: seed_a
+lookup_only: false
+params:
+  patient_id: 11
+instruction: Open the dashboard of patient {patient_id}, mark the patient deceased and confirm. Report done.
+invariants:
+- id: identifiers_unique
+  expect:
+    equals: 0
+  sql: SELECT count(*) FROM (SELECT identifier FROM patient_identifier WHERE voided = 0 GROUP BY identifier HAVING count(*) > 1) d
+- id: no_orphan_names
+  expect:
+    equals: 0
+  sql: SELECT count(*) FROM person_name n LEFT JOIN person p ON p.person_id = n.person_id WHERE p.person_id IS NULL
+goal:
+- id: patient_dead
+  expect:
+    equals: 1
+  sql: SELECT dead FROM person WHERE person_id = :patient_id
+frame:
+  unchanged:
+  - person
+  - person_name
+  - person_address
+  - person_attribute
+  - patient
+  - patient_identifier
+  - visit
+  - encounter
+  - obs
+  - allergy
+  - allergy_reaction
+  - relationship
+  allowed:
+  - table: person
+    where: person_id = :patient_id
+    columns:
+    - dead
+    - death_date
+    - cause_of_death
+    - changed_by
+    - date_changed
