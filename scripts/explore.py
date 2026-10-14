@@ -34,12 +34,12 @@ def main():
                 page.wait_for_timeout(step["ms"])
         for i, url in enumerate(sys.argv[3:]):
             if url.startswith("fill:"):
-                sel, _, val = url[5:].partition("=")
+                sel, _, val = url[5:].rpartition("=")
                 page.fill(sel, val)
                 page.wait_for_timeout(300)
                 continue
             if url.startswith("select:"):
-                sel, _, val = url[7:].partition("=")
+                sel, _, val = url[7:].rpartition("=")
                 page.select_option(sel, val)
                 page.wait_for_timeout(300)
                 continue
