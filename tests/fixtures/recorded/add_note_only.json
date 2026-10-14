@@ -1,0 +1,53 @@
+{
+  "workflow": "claimdesk.add_note_only",
+  "viewport": [
+    1366,
+    768
+  ],
+  "transcript": [
+    {
+      "name": "computer",
+      "input": {
+        "action": "left_click",
+        "coordinate": [
+          42,
+          662
+        ]
+      }
+    },
+    {
+      "name": "computer",
+      "input": {
+        "action": "left_click",
+        "coordinate": [
+          170,
+          348
+        ]
+      }
+    },
+    {
+      "name": "computer",
+      "input": {
+        "action": "type",
+        "text": "reviewed by supervisor"
+      }
+    },
+    {
+      "name": "computer",
+      "input": {
+        "action": "left_click",
+        "coordinate": [
+          48,
+          385
+        ]
+      }
+    },
+    {
+      "name": "report_outcome",
+      "input": {
+        "status": "done",
+        "summary": "Added the review note and saved it."
+      }
+    }
+  ]
+}

@@ -11,7 +11,7 @@ documented adaptation. Blocked = cannot run on the build machine yet; the reason
 | V04 | Pass | `test_runtime.py::test_arm_b_golden_is_valid_success` |
 | V05 | Pass | `test_stop_midway_rolls_back` (arm S: rolled back, VF, exact; arm B: IF) |
 | V06 | Pass | `test_bench.py::test_claude_loop_recorded_responses` (no network) |
-| V07 | Blocked | Live Haiku run needs `ANTHROPIC_API_KEY`; none is set. The toolset type name is unverified against the live API. |
+| V07 | Simulated (by choice) | No real model call and no spend. `agent/simulated.py` replays a recorded 5-step computer-tool transcript through the real `ClaudeAgent` loop on a live ClaimDesk (`test_simulated_live.py`: click by pixel, type, Save note detected as risky, committed, oracle VS, A8 cost accounted). A real run still needs `ANTHROPIC_API_KEY`, and the toolset type name is unverified against the live API. |
 | V08 | Pass | budget guard test and API 402 test; zero model calls |
 | V09 | Pass | S0 checkpoint at step 0 before step 1 |
 | V10 | Pass | `test_risky_checkpoint_dedupe`: S0 plus one checkpoint per committing click |

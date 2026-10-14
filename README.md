@@ -26,8 +26,8 @@ failure mix. **They say nothing about how reliable any model is.**
 - 60 of 60 restores exact (database, files, browser session, URL). Checkpoint p95 47 ms, restore p95 94 ms.
 - Full tables, pass^k and sample sizes: [docs/results.md](docs/results.md).
 
-Not yet measured: a live Claude agent (needs `ANTHROPIC_API_KEY`; the loop is built and tested against recorded
-responses), and the OpenMRS and iDempiere apps (need Docker). See [docs/validation.md](docs/validation.md).
+Not yet measured: a live Claude agent (no real model call was made; a simulated run through the real agent loop
+is in `tests/integration/test_simulated_live.py`, and a real run needs `ANTHROPIC_API_KEY`), and the OpenMRS and iDempiere apps (need Docker). See [docs/validation.md](docs/validation.md).
 
 ## Quick start
 
