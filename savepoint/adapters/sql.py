@@ -36,22 +36,37 @@ class SqlAdapter(AppAdapter):
             conn.execute(text("SET default_transaction_read_only = on"))
             conn.execute(text(f"SET statement_timeout = {QUERY_TIMEOUT_MS}"))
 
+    def _writable(self, conn):
+        if self.dialect == "mysql":
+            conn.execute(text("SET SESSION TRANSACTION READ WRITE"))
+            conn.execute(text("SET SESSION MAX_EXECUTION_TIME=0"))
+        else:
+            conn.execute(text("SET default_transaction_read_only = off"))
+            conn.execute(text("SET statement_timeout = 0"))
+
     def select(self, sql: str, params: dict | None = None, snapshot: str | None = None) -> list[tuple]:
         if snapshot:  # server adapters keep no queryable copy of a checkpoint
             return []
         names = set(re.findall(r":(\w+)", sql))
         with self.engine.connect() as conn:
             self._readonly(conn)
-            rows = conn.execute(text(sql), {k: v for k, v in (params or {}).items() if k in names}).fetchall()
-            conn.rollback()
-            return [tuple(r) for r in rows]
+            try:
+                rows = conn.execute(text(sql), {k: v for k, v in (params or {}).items() if k in names}).fetchall()
+                return [tuple(r) for r in rows]
+            finally:
+                conn.rollback()
+                self._writable(conn)
+                conn.commit()
 
     def query(self, sql: str, params: dict | None = None) -> list[dict]:
         with self.engine.connect() as conn:
             self._readonly(conn)
-            rows = [dict(r) for r in conn.execute(text(sql), params or {}).mappings().all()]
-            conn.rollback()
-            return rows
+            try:
+                return [dict(r) for r in conn.execute(text(sql), params or {}).mappings().all()]
+            finally:
+                conn.rollback()
+                self._writable(conn)
+                conn.commit()
 
     # -- snapshot and restore --------------------------------------------------------------------------------
     def _read_all(self) -> dict[str, list[dict]]:
