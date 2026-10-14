@@ -32,10 +32,10 @@ def register(given, family, gender="Female", day="12", month="4", year="1990", w
     ]
 
 
-def edit_section(pid, section, field_sel, value, wrong):
+def edit_section(pid, section, field_sel, value, wrong, nexts):
     return [
         goto(EDIT.format(pid=pid, sec=section)),
-        {"type": "fill", "selector": field_sel, "value": value, "wrong": wrong}, NEXT,
+        {"type": "fill", "selector": field_sel, "value": value, "wrong": wrong}, *([NEXT] * nexts),
         {"type": "click", "selector": "#submit", "commit": True},
         {"type": "wait", "ms": 3000},
     ]
@@ -53,11 +53,11 @@ def steps(slug: str, p: dict) -> list[dict]:
     if slug == "onboard_patient":
         return register(p["given"], p["family"], wrong_family="Rao")
     if slug == "update_family_name":
-        return edit_section(pid, "demographics", "input[name=familyName]", p["family"], "Wrongname")
+        return edit_section(pid, "demographics", "input[name=familyName]", p["family"], "Wrongname", 3)
     if slug == "update_given_name":
-        return edit_section(pid, "demographics", "input[name=givenName]", p["given"], "Wrongname")
+        return edit_section(pid, "demographics", "input[name=givenName]", p["given"], "Wrongname", 3)
     if slug == "update_address":
-        return edit_section(pid, "contactInfo", "#address1", p["address1"], "999 Wrong Road")
+        return edit_section(pid, "contactInfo", "#address1", p["address1"], "999 Wrong Road", 2)
     if slug == "add_allergy":
         return [goto(f"/openmrs/allergyui/allergy.page?patientId={pid}"),
                 {"type": "click", "selector": f"#allergen-{p['allergen']}", "wrong_selector": "#allergen-71617"},
@@ -68,8 +68,8 @@ def steps(slug: str, p: dict) -> list[dict]:
         return start_visit(pid)
     if slug == "end_visit":
         return [goto(DASH.format(pid=pid)),
-                {"type": "click", "selector": "text=End Visit", "commit": True},
-                {"type": "click", "selector": "button:has-text('Yes')"},
+                {"type": "click", "selector": 'a[id="referenceapplication.realTime.endVisit"]:visible'},
+                {"type": "click", "selector": "button:has-text('Yes'):visible", "commit": True},
                 {"type": "wait", "ms": 3000}]
     if slug == "delete_patient":
         return [goto(DASH.format(pid=pid)),
@@ -77,10 +77,18 @@ def steps(slug: str, p: dict) -> list[dict]:
                 {"type": "fill", "selector": "#delete-reason", "value": "duplicate record"},
                 {"type": "click", "selector": "#delete-patient-creation-dialog button.confirm", "commit": True},
                 {"type": "wait", "ms": 3000}]
-    if slug == "mark_deceased":
+    if slug == "capture_vitals":
         return [goto(DASH.format(pid=pid)),
-                {"type": "click", "selector": '[id="org.openmrs.module.coreapps.markPatientDead"]'},
-                {"type": "wait", "ms": 1500}]
+                {"type": "click", "selector": 'a[id="referenceapplication.realTime.vitals"]:visible'},
+                {"type": "fill", "selector": "#w8", "value": str(p["height"])}, NEXT,
+                {"type": "fill", "selector": "#w10", "value": str(p["weight"]), "wrong": "65"}, NEXT, NEXT,
+                {"type": "fill", "selector": "#w12", "value": "36.8"}, NEXT,
+                {"type": "fill", "selector": "#w14", "value": "72"}, NEXT,
+                {"type": "fill", "selector": "#w16", "value": "16"}, NEXT,
+                {"type": "fill", "selector": "#w18", "value": "120"},
+                {"type": "fill", "selector": "#w20", "value": "80"}, NEXT, NEXT,
+                {"type": "click", "selector": "#submit", "commit": True},
+                {"type": "wait", "ms": 3000}]
     if slug == "lookup_patient":
         return [goto(DASH.format(pid=pid)), {"type": "wait", "ms": 500}]
     raise KeyError(slug)

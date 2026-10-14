@@ -1,11 +1,13 @@
-id: openmrs.mark_deceased
+id: openmrs.capture_vitals
 app: openmrs
-title: Mark a patient deceased
+title: Capture vital signs
 fixture: seed_a
 lookup_only: false
 params:
-  patient_id: 11
-instruction: Open the dashboard of patient {patient_id}, mark the patient deceased and confirm. Report done.
+  patient_id: 9
+  height: 170
+  weight: 62
+instruction: Open the dashboard of patient {patient_id}, capture vitals with height {height} cm and weight {weight} kg, and save. Report done.
 invariants:
 - id: identifiers_unique
   expect:
@@ -16,10 +18,14 @@ invariants:
     equals: 0
   sql: SELECT count(*) FROM person_name n LEFT JOIN person p ON p.person_id = n.person_id WHERE p.person_id IS NULL
 goal:
-- id: patient_dead
+- id: weight_recorded
   expect:
     equals: 1
-  sql: SELECT dead FROM person WHERE person_id = :patient_id
+  sql: SELECT count(*) FROM obs WHERE person_id = :patient_id AND concept_id = 5089 AND value_numeric = :weight AND voided = 0
+- id: height_recorded
+  expect:
+    equals: 1
+  sql: SELECT count(*) FROM obs WHERE person_id = :patient_id AND concept_id = 5090 AND value_numeric = :height AND voided = 0
 frame:
   unchanged:
   - person
@@ -35,11 +41,7 @@ frame:
   - allergy_reaction
   - relationship
   allowed:
-  - table: person
-    where: person_id = :patient_id
-    columns:
-    - dead
-    - death_date
-    - cause_of_death
-    - changed_by
-    - date_changed
+  - table: encounter
+    insert: 1
+  - table: obs
+    insert: 9

@@ -42,6 +42,7 @@ frame:
     - voided_by
     - date_voided
     - void_reason
+    - changed_by
   - table: person
     where: person_id = :patient_id
     columns:
@@ -49,6 +50,7 @@ frame:
     - voided_by
     - date_voided
     - void_reason
+    - changed_by
   - table: person_name
     where: person_id = :patient_id
     columns:
@@ -56,6 +58,7 @@ frame:
     - voided_by
     - date_voided
     - void_reason
+    - changed_by
   - table: person_address
     where: person_id = :patient_id
     columns:
@@ -63,6 +66,7 @@ frame:
     - voided_by
     - date_voided
     - void_reason
+    - changed_by
   - table: patient_identifier
     where: patient_id = :patient_id
     columns:
@@ -70,3 +74,4 @@ frame:
     - voided_by
     - date_voided
     - void_reason
+    - changed_by

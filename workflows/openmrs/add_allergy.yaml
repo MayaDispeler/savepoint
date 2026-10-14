@@ -41,3 +41,8 @@ frame:
     insert: 1
   - table: allergy_reaction
     insert: 3
+  - table: patient
+    where: patient_id = :patient_id
+    columns:
+    - allergy_status
+    - changed_by
