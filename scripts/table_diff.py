@@ -2,6 +2,7 @@
 Usage: table_diff.py <mysql|postgres> <url> snap <file> | diff <file>"""
 import json
 import sys
+from pathlib import Path
 
 from sqlalchemy import create_engine, text
 
@@ -27,10 +28,10 @@ def main():
     dialect, url, cmd, path = sys.argv[1:5]
     cur = state(url, dialect)
     if cmd == "snap":
-        json.dump(cur, open(path, "w"))
+        Path(path).write_text(json.dumps(cur))
         print("saved", len(cur), "tables")
     else:
-        old = json.load(open(path))
+        old = json.loads(Path(path).read_text())
         print("changed:", sorted(t for t in cur if old.get(t) != cur[t]))
 
 
