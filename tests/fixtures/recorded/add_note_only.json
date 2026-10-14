@@ -9,20 +9,14 @@
       "name": "computer",
       "input": {
         "action": "left_click",
-        "coordinate": [
-          42,
-          662
-        ]
+        "target": "a:text-is(\"CL-10428\")"
       }
     },
     {
       "name": "computer",
       "input": {
         "action": "left_click",
-        "coordinate": [
-          170,
-          348
-        ]
+        "target": "textarea[name=body]"
       }
     },
     {
@@ -36,10 +30,7 @@
       "name": "computer",
       "input": {
         "action": "left_click",
-        "coordinate": [
-          48,
-          385
-        ]
+        "target": "#save-note"
       }
     },
     {

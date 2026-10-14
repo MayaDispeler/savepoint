@@ -13,10 +13,12 @@ WF = Path(__file__).resolve().parents[2] / "workflows" / "claimdesk"
 def test_simulated_haiku_run_through_real_agent_loop(live):  # V07 stand-in: no real model call
     c = schema.load(str(WF / "add_note_only.yaml"))
     golden = compute_golden(c, live())
-    client = simulated.SimulatedClient(simulated.load("add_note_only"))
+    ctx = live()
+    client = simulated.SimulatedClient(simulated.load("add_note_only"),
+                                       page_provider=lambda: ctx._contexts[-1].pages[0])
     guard = BudgetGuard(cap_usd=25)
     agent = ClaudeAgent(client, "claude-haiku-5-5", c.text(), guard, "sim-run")
-    res = run_workflow(c, "S", agent, 1, live(), golden)
+    res = run_workflow(c, "S", agent, 1, ctx, golden)
     run = res["run"]
     assert (run["agent_status"], run["sp_outcome"], run["oracle"]) == ("done", "committed", "VS")
     assert client.calls == 5 and not client.transcript            # model "called" 5 times, all replayed
