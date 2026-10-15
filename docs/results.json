@@ -1,116 +1,318 @@
 {
   "arms": {
     "B": {
-      "n": 100,
-      "VS": 70,
-      "VF": 0,
-      "IS": 27,
+      "n": 150,
+      "VS": 100,
+      "VF": 2,
+      "IS": 45,
       "IF": 3,
-      "atomicity": 0.7,
+      "atomicity": 0.68,
       "atomicity_ci95": [
-        0.6041496156718804,
-        0.7810524613377188
+        0.6016545135045653,
+        0.7493558764029761
       ],
-      "valid_success": 0.7,
-      "invalid_success_rate": 0.27,
-      "unsafe_side_effect_rate": 0.03,
+      "valid_success": 0.6666666666666666,
+      "invalid_success_rate": 0.3,
+      "unsafe_side_effect_rate": 0.02,
       "pass_hat_k": {
-        "1": 0.7,
-        "2": 0.48,
-        "3": 0.325,
-        "4": 0.22142857142857145,
-        "5": 0.15714285714285714,
-        "6": 0.12142857142857141,
-        "7": 0.10500000000000001,
-        "8": 0.1,
-        "9": 0.1,
-        "10": 0.1
+        "1": 0.65,
+        "2": 0.40499999999999997,
+        "3": 0.2475,
+        "4": 0.16071428571428573,
+        "5": 0.12857142857142856
       },
-      "workflows": 10,
-      "trials_per_workflow": 10
+      "workflows": 20,
+      "trials_per_workflow": 5
     },
     "R": {
-      "n": 100,
-      "VS": 97,
-      "VF": 3,
+      "n": 150,
+      "VS": 145,
+      "VF": 5,
       "IS": 0,
       "IF": 0,
       "atomicity": 1.0,
       "atomicity_ci95": [
-        0.9630051925239981,
-        0.9999999999999999
+        0.9750288608542812,
+        1.0
       ],
-      "valid_success": 0.97,
+      "valid_success": 0.9666666666666667,
       "invalid_success_rate": 0.0,
       "unsafe_side_effect_rate": 0.0,
       "pass_hat_k": {
-        "1": 0.97,
-        "2": 0.9400000000000001,
-        "3": 0.9099999999999999,
-        "4": 0.8800000000000001,
-        "5": 0.85,
-        "6": 0.82,
-        "7": 0.79,
-        "8": 0.76,
-        "9": 0.73,
-        "10": 0.7
+        "1": 0.9650000000000001,
+        "2": 0.93,
+        "3": 0.8949999999999999,
+        "4": 0.86,
+        "5": 0.825
       },
-      "workflows": 10,
-      "trials_per_workflow": 10
+      "workflows": 20,
+      "trials_per_workflow": 5
     },
     "S": {
-      "n": 100,
-      "VS": 70,
-      "VF": 30,
+      "n": 150,
+      "VS": 100,
+      "VF": 50,
       "IS": 0,
       "IF": 0,
       "atomicity": 1.0,
       "atomicity_ci95": [
-        0.9630051925239981,
-        0.9999999999999999
+        0.9750288608542812,
+        1.0
       ],
-      "valid_success": 0.7,
+      "valid_success": 0.6666666666666666,
       "invalid_success_rate": 0.0,
       "unsafe_side_effect_rate": 0.0,
       "pass_hat_k": {
-        "1": 0.7,
-        "2": 0.48,
-        "3": 0.325,
-        "4": 0.22142857142857145,
-        "5": 0.15714285714285714,
-        "6": 0.12142857142857141,
-        "7": 0.10500000000000001,
-        "8": 0.1,
-        "9": 0.1,
-        "10": 0.1
+        "1": 0.65,
+        "2": 0.40499999999999997,
+        "3": 0.2475,
+        "4": 0.16071428571428573,
+        "5": 0.12857142857142856
       },
-      "workflows": 10,
-      "trials_per_workflow": 10
+      "workflows": 20,
+      "trials_per_workflow": 5
     }
   },
   "catch": {
-    "false_claims": 25,
-    "caught": 25,
+    "false_claims": 43,
+    "caught": 43,
     "catch_rate": 1.0,
-    "true_claims": 70,
+    "true_claims": 100,
     "false_alarms": 0,
     "false_alarm_rate": 0.0
   },
   "fidelity": {
-    "restores": 60,
-    "exact": 60,
+    "restores": 100,
+    "exact": 100,
     "exact_rate": 1.0
   },
   "overhead": {
-    "checkpoint_restore_share_of_wall": 0.07696521622945708,
-    "mean_wall_ms_B": 801.82,
-    "mean_wall_ms_S": 1022.05
+    "checkpoint_restore_share_of_wall": 0.05068400096620877,
+    "mean_wall_ms_B": 2234.28,
+    "mean_wall_ms_S": 2575.653333333333
   },
   "timings": {
-    "checkpoint_p95_ms": 47,
-    "restore_p95_ms": 94,
-    "checkpoints": 379
+    "checkpoint_p95_ms": 64,
+    "restore_p95_ms": 525,
+    "checkpoints": 541
   },
   "quarantined": 0,
+  "by_app": {
+    "claimdesk": {
+      "arms": {
+        "B": {
+          "n": 100,
+          "VS": 70,
+          "VF": 0,
+          "IS": 27,
+          "IF": 3,
+          "atomicity": 0.7,
+          "atomicity_ci95": [
+            0.6041496156718804,
+            0.7810524613377188
+          ],
+          "valid_success": 0.7,
+          "invalid_success_rate": 0.27,
+          "unsafe_side_effect_rate": 0.03,
+          "pass_hat_k": {
+            "1": 0.7,
+            "2": 0.48,
+            "3": 0.325,
+            "4": 0.22142857142857145,
+            "5": 0.15714285714285714,
+            "6": 0.12142857142857141,
+            "7": 0.10500000000000001,
+            "8": 0.1,
+            "9": 0.1,
+            "10": 0.1
+          },
+          "workflows": 10,
+          "trials_per_workflow": 10
+        },
+        "R": {
+          "n": 100,
+          "VS": 97,
+          "VF": 3,
+          "IS": 0,
+          "IF": 0,
+          "atomicity": 1.0,
+          "atomicity_ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ],
+          "valid_success": 0.97,
+          "invalid_success_rate": 0.0,
+          "unsafe_side_effect_rate": 0.0,
+          "pass_hat_k": {
+            "1": 0.97,
+            "2": 0.9400000000000001,
+            "3": 0.9099999999999999,
+            "4": 0.8800000000000001,
+            "5": 0.85,
+            "6": 0.82,
+            "7": 0.79,
+            "8": 0.76,
+            "9": 0.73,
+            "10": 0.7
+          },
+          "workflows": 10,
+          "trials_per_workflow": 10
+        },
+        "S": {
+          "n": 100,
+          "VS": 70,
+          "VF": 30,
+          "IS": 0,
+          "IF": 0,
+          "atomicity": 1.0,
+          "atomicity_ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ],
+          "valid_success": 0.7,
+          "invalid_success_rate": 0.0,
+          "unsafe_side_effect_rate": 0.0,
+          "pass_hat_k": {
+            "1": 0.7,
+            "2": 0.48,
+            "3": 0.325,
+            "4": 0.22142857142857145,
+            "5": 0.15714285714285714,
+            "6": 0.12142857142857141,
+            "7": 0.10500000000000001,
+            "8": 0.1,
+            "9": 0.1,
+            "10": 0.1
+          },
+          "workflows": 10,
+          "trials_per_workflow": 10
+        }
+      },
+      "catch": {
+        "false_claims": 25,
+        "caught": 25,
+        "catch_rate": 1.0,
+        "true_claims": 70,
+        "false_alarms": 0,
+        "false_alarm_rate": 0.0
+      },
+      "fidelity": {
+        "restores": 60,
+        "exact": 60,
+        "exact_rate": 1.0
+      },
+      "overhead": {
+        "checkpoint_restore_share_of_wall": 0.07696521622945708,
+        "mean_wall_ms_B": 801.82,
+        "mean_wall_ms_S": 1022.05
+      },
+      "timings": {
+        "checkpoint_p95_ms": 47,
+        "restore_p95_ms": 94,
+        "checkpoints": 379
+      },
+      "quarantined": 0
+    },
+    "openmrs": {
+      "arms": {
+        "B": {
+          "n": 50,
+          "VS": 30,
+          "VF": 2,
+          "IS": 18,
+          "IF": 0,
+          "atomicity": 0.64,
+          "atomicity_ci95": [
+            0.5014076201030195,
+            0.7586143703281711
+          ],
+          "valid_success": 0.6,
+          "invalid_success_rate": 0.36,
+          "unsafe_side_effect_rate": 0.0,
+          "pass_hat_k": {
+            "1": 0.6,
+            "2": 0.32999999999999996,
+            "3": 0.16999999999999998,
+            "4": 0.1,
+            "5": 0.1
+          },
+          "workflows": 10,
+          "trials_per_workflow": 5
+        },
+        "R": {
+          "n": 50,
+          "VS": 48,
+          "VF": 2,
+          "IS": 0,
+          "IF": 0,
+          "atomicity": 1.0,
+          "atomicity_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "valid_success": 0.96,
+          "invalid_success_rate": 0.0,
+          "unsafe_side_effect_rate": 0.0,
+          "pass_hat_k": {
+            "1": 0.96,
+            "2": 0.9199999999999999,
+            "3": 0.8800000000000001,
+            "4": 0.8400000000000001,
+            "5": 0.8
+          },
+          "workflows": 10,
+          "trials_per_workflow": 5
+        },
+        "S": {
+          "n": 50,
+          "VS": 30,
+          "VF": 20,
+          "IS": 0,
+          "IF": 0,
+          "atomicity": 1.0,
+          "atomicity_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "valid_success": 0.6,
+          "invalid_success_rate": 0.0,
+          "unsafe_side_effect_rate": 0.0,
+          "pass_hat_k": {
+            "1": 0.6,
+            "2": 0.32999999999999996,
+            "3": 0.16999999999999998,
+            "4": 0.1,
+            "5": 0.1
+          },
+          "workflows": 10,
+          "trials_per_workflow": 5
+        }
+      },
+      "catch": {
+        "false_claims": 18,
+        "caught": 18,
+        "catch_rate": 1.0,
+        "true_claims": 30,
+        "false_alarms": 0,
+        "false_alarm_rate": 0.0
+      },
+      "fidelity": {
+        "restores": 40,
+        "exact": 40,
+        "exact_rate": 1.0
+      },
+      "overhead": {
+        "checkpoint_restore_share_of_wall": 0.041706034229620534,
+        "mean_wall_ms_B": 5099.2,
+        "mean_wall_ms_S": 5682.86
+      },
+      "timings": {
+        "checkpoint_p95_ms": 71,
+        "restore_p95_ms": 529,
+        "checkpoints": 162
+      },
+      "quarantined": 0
+    }
+  },
   "agent": "scripted fault-injecting agent (not a language model)"
 }

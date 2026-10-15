@@ -94,7 +94,7 @@ def frame_violations(contract: Contract, s0: Digest, now: Digest, adapter, s0_db
             where = rule.get("where")
             if not where:
                 return set()
-            pk = adapter.monitored_tables.get(table, "id")
+            pk = adapter.pk_sql(table)
             rows = adapter.select(f"SELECT {pk} FROM {table} WHERE {where}", contract.params, snapshot=snapshot)
             return {str(r[0]) for r in rows}
 

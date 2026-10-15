@@ -44,18 +44,18 @@ class Actuator:
             p.goto(action["url"])
         elif t == "click":
             if action.get("selector"):
-                p.click(action["selector"], timeout=5000)
+                p.click(action["selector"], timeout=10000)
             else:
                 p.mouse.click(action["x"], action["y"])
         elif t == "fill":
-            p.fill(action["selector"], str(action["value"]), timeout=5000)
+            p.fill(action["selector"], str(action["value"]), timeout=10000)
         elif t == "select":
-            p.select_option(action["selector"], str(action["value"]), timeout=5000)
+            p.select_option(action["selector"], str(action["value"]), timeout=10000)
         elif t == "click_until":  # wizard helper: press Next until the target control is visible
             for _ in range(action.get("max", 8)):
                 if p.is_visible(action["until"]):
                     break
-                p.click(action["selector"], timeout=5000)
+                p.click(action["selector"], timeout=10000)
                 p.wait_for_timeout(300)
         elif t == "type":
             p.keyboard.type(action["text"])

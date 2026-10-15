@@ -53,7 +53,7 @@ function viewRuns() {
   const apps = [...new Set(B.runs.map((r) => r.workflow_id.split(".")[0]))];
   for (const app of apps) {
     const appRuns = B.runs.filter((r) => r.workflow_id.startsWith(app + "."));
-    const T = Math.max(...appRuns.map((r) => r.trial));
+    const T = 10; // same column count for every app so all tiles are one size
     const cols = `style="grid-template-columns:260px repeat(${T},minmax(0,1fr))"`;
     h += `<h2 style="margin:24px 0 8px">${esc(APP_NAME[app] || app)}</h2>`;
     for (const arm of ARMS) {

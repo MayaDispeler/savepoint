@@ -40,29 +40,31 @@ def run_steps(ctx, steps_agent):
 
 def seed(app):
     adapter, base = make(app)
-    from savepoint.agent import openmrs_paths as op
     with sync_playwright() as p:
         b = p.chromium.launch()
         ctx = RunContext(adapter, b, base, "artifacts")
         page = ctx.new_page()
         act = Actuator(page)
-        cast = [("Ravi", "Menon", False), ("Meera", "Iyer", True), ("Dev", "Patel", False), ("Kiran", "Shah", False)]
-        for given, family, visit in cast:
-            steps = op.register(given, family)
-            if visit:
-                steps = steps + op.start_visit(adapter.query("SELECT MAX(patient_id) AS m FROM patient")[0]["m"] + 1)
-            for s in steps:
-                s = dict(s)
-                s.pop("commit", None)
-                s.pop("wrong", None)
-                if s["type"] == "goto":
-                    s["url"] = base + s.pop("path")
-                act.execute(s)
+        if app == "openmrs":
+            from savepoint.agent import openmrs_paths as op
+            cast = [("Ravi", "Menon", False), ("Meera", "Iyer", True), ("Dev", "Patel", False), ("Kiran", "Shah", False)]
+            steps = []
+            for given, family, visit in cast:
+                steps += op.register(given, family)
+                if visit:
+                    steps += op.start_visit(adapter.query("SELECT MAX(patient_id) AS m FROM patient")[0]["m"] + 1)
+        else:
+            from savepoint.agent import idempiere_paths as ip
+            steps = ip.steps("create_business_partner", {"value": "BP-DELME", "name": "Delete Me Partner"})
+        for s in steps:
+            s = dict(s)
+            s.pop("commit", None)
+            s.pop("wrong", None)
+            if s["type"] == "goto":
+                s["url"] = base + s.pop("path")
+            act.execute(s)
         ctx.close()
         b.close()
-    rows = adapter.query("SELECT p.patient_id, n.given_name, n.family_name FROM patient p JOIN person_name n "
-                         "ON n.person_id = p.patient_id AND n.voided = 0 ORDER BY p.patient_id")
-    print(rows)
     print("baseline bytes", adapter.make_baseline())
 
 

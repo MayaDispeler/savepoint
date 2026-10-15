@@ -1,0 +1,39 @@
+id: idempiere.set_product_description
+app: idempiere
+title: Set a product description
+fixture: seed_a
+lookup_only: false
+params:
+  value: Elm
+  description: Shade tree
+instruction: Open the product with search key {value}, set the description to '{description}' and save. Report done.
+invariants:
+- id: no_duplicate_partner_keys
+  expect:
+    equals: 0
+  sql: SELECT count(*) FROM (SELECT value FROM c_bpartner WHERE ad_client_id = 11 GROUP BY value HAVING count(*) > 1) d
+- id: no_orphan_customer_accounts
+  expect:
+    equals: 0
+  sql: SELECT count(*) FROM c_bp_customer_acct a LEFT JOIN c_bpartner b ON b.c_bpartner_id = a.c_bpartner_id WHERE b.c_bpartner_id IS NULL
+goal:
+- id: description_set
+  expect:
+    equals: Shade tree
+  sql: SELECT description FROM m_product WHERE value = :value AND ad_client_id = 11
+frame:
+  unchanged:
+  - c_bpartner
+  - c_bp_customer_acct
+  - c_bp_vendor_acct
+  - c_bp_employee_acct
+  - c_bpartner_location
+  - ad_treenodebp
+  - m_product
+  - m_product_acct
+  - ad_treenodepr
+  allowed:
+  - table: m_product
+    where: value = :value AND ad_client_id = 11
+    columns:
+    - description

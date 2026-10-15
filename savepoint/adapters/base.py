@@ -37,6 +37,10 @@ class AppAdapter:
         page.goto(self.base_url + "/login")
         page.click("button[type=submit]")
 
+    def pk_sql(self, table: str) -> str:
+        """SQL expression for a monitored table's row key (the primary key column)."""
+        return self.monitored_tables.get(table, "id")
+
     def select(self, sql: str, params: dict | None = None, snapshot: str | None = None) -> list[tuple]:
         """Read-only SELECT with named params (:name). With `snapshot`, query that checkpoint's database copy
         when the engine supports it; otherwise return no rows."""

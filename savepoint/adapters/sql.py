@@ -7,10 +7,12 @@ compare, as for SQLite. Scope note: changes to tables outside `monitored_tables`
 import pickle
 import re
 from pathlib import Path
+from typing import ClassVar
 
 from sqlalchemy import create_engine, text
 
 from savepoint.adapters.base import AppAdapter
+from savepoint.snapshot.digest import Digest, row_digest
 
 QUERY_TIMEOUT_MS = 2000
 
@@ -19,11 +21,13 @@ class SqlAdapter(AppAdapter):
     dialect = "mysql"  # or "postgresql"
     url: str = ""
     baseline_path: str = "baseline.pkl"
+    connect_args: ClassVar[dict] = {}
+    row_filters: ClassVar[dict[str, str]] = {}  # table -> WHERE clause limiting the rows we snapshot and restore
 
     def __init__(self, base_url: str, url: str, baseline_path: str | None = None):
         super().__init__(base_url)
         self.url = url
-        self.engine = create_engine(url, pool_pre_ping=True, pool_size=2, max_overflow=2)
+        self.engine = create_engine(url, pool_pre_ping=True, pool_size=2, max_overflow=2, connect_args=self.connect_args)
         if baseline_path:
             self.baseline_path = baseline_path
 
@@ -68,6 +72,46 @@ class SqlAdapter(AppAdapter):
                 self._writable(conn)
                 conn.commit()
 
+    # -- table access ----------------------------------------------------------------------------------------
+    def _pg_columns(self, conn, table: str) -> list[tuple[str, str]]:
+        cache = self.__dict__.setdefault("_col_cache", {})
+        if table not in cache:
+            rows = conn.execute(text(
+                "SELECT a.attname, format_type(a.atttypid, a.atttypmod) FROM pg_attribute a "
+                "WHERE a.attrelid = CAST(:t AS regclass) AND a.attnum > 0 AND NOT a.attisdropped ORDER BY a.attnum"),
+                {"t": table}).fetchall()
+            cache[table] = [(r[0], r[1]) for r in rows]
+        return cache[table]
+
+    def _table_rows(self, conn, table: str, order_by: str | None = None) -> list[dict]:
+        """All rows of a table. PostgreSQL columns are read as text so out-of-range dates (iDempiere has some
+        BC timestamps) never fail in the driver; restore casts them back."""
+        order = f" ORDER BY {order_by}" if order_by else ""
+        where = f" WHERE {self.row_filters[table]}" if table in self.row_filters else ""
+        if self.dialect == "mysql":
+            return [dict(r) for r in conn.execute(text(f"SELECT * FROM {table}{where}{order}")).mappings().all()]
+        cols = ", ".join(f'"{c}"::text AS "{c}"' for c, _ in self._pg_columns(conn, table))
+        return [dict(r) for r in conn.execute(text(f"SELECT {cols} FROM {table}{where}{order}")).mappings().all()]
+
+    def pk_sql(self, table: str) -> str:
+        cols = [c.strip() for c in self.monitored_tables[table].split(",")]
+        if len(cols) == 1:
+            return cols[0]
+        if self.dialect == "mysql":
+            return "CONCAT_WS('|', " + ", ".join(cols) + ")"
+        return " || '|' || ".join(f"CAST({c} AS text)" for c in cols)
+
+    def digest(self) -> Digest:
+        out: Digest = {}
+        with self.engine.connect() as conn:
+            for table, pk in self.monitored_tables.items():
+                volatile = self.volatile_columns.get(table, [])
+                cols = [c.strip() for c in pk.split(",")]
+                rows = self._table_rows(conn, table, pk)
+                out[table] = {"|".join(str(r[c]) for c in cols): row_digest(r, volatile) for r in rows}
+            conn.rollback()
+        return out
+
     # -- snapshot and restore --------------------------------------------------------------------------------
     def _read_all(self) -> dict[str, list[dict]]:
         out = {}
@@ -76,7 +120,7 @@ class SqlAdapter(AppAdapter):
                 conn.execute(text("SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ"))
                 conn.execute(text("START TRANSACTION WITH CONSISTENT SNAPSHOT"))
             for table in self.monitored_tables:
-                out[table] = [dict(r) for r in conn.execute(text(f"SELECT * FROM {table}")).mappings().all()]
+                out[table] = self._table_rows(conn, table)
             conn.rollback()
         return out
 
@@ -94,12 +138,18 @@ class SqlAdapter(AppAdapter):
             else:
                 conn.execute(text("SET session_replication_role = replica"))
             for table in self.monitored_tables:
-                conn.execute(text(f"DELETE FROM {table}"))
+                where = f" WHERE {self.row_filters[table]}" if table in self.row_filters else ""
+                conn.execute(text(f"DELETE FROM {table}{where}"))
             for table, rows in data.items():
                 if rows:
                     cols = list(rows[0])
-                    q = ", ".join(f'"{c}"' if self.dialect != "mysql" else f"`{c}`" for c in cols)
-                    ph = ", ".join(f":{c}" for c in cols)
+                    if self.dialect == "mysql":
+                        q = ", ".join(f"`{c}`" for c in cols)
+                        ph = ", ".join(f":{c}" for c in cols)
+                    else:
+                        types = dict(self._pg_columns(conn, table))
+                        q = ", ".join(f'"{c}"' for c in cols)
+                        ph = ", ".join(f"CAST(:{c} AS {types[c]})" for c in cols)
                     conn.execute(text(f"INSERT INTO {table} ({q}) VALUES ({ph})"), rows)
             if self.dialect == "mysql":
                 for table, pk in self.monitored_tables.items():

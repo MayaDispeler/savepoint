@@ -49,8 +49,8 @@ def main():
             page.click(".tab[data-view=benchmark]")
             rj = json.loads((ROOT.parents[1] / "docs" / "results.json").read_text())
             r["chart_matches_results"] = all(
-                abs(rj["arms"][a]["pass_hat_k"][str(k)] - page.evaluate(f"window.BUNDLE.results.arms['{a}'].pass_hat_k['{k}']")) < 5e-4
-                for a in rj["arms"] for k in range(1, 11))
+                abs(v - page.evaluate(f"window.BUNDLE.results.by_app['{app}'].arms['{a}'].pass_hat_k['{k}']")) < 5e-4
+                for app, am in rj["by_app"].items() for a, x in am["arms"].items() for k, v in x["pass_hat_k"].items())
             # keyboard: tab through, every focus lands on an interactive element
             page.keyboard.press("Tab")
             r["external_requests"] = [u for u in reqs if not u.startswith("file:")]

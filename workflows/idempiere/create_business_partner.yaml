@@ -1,0 +1,43 @@
+id: idempiere.create_business_partner
+app: idempiere
+title: Create a business partner
+fixture: seed_a
+lookup_only: false
+params:
+  value: BP-T01
+  name: Test Partner One
+instruction: Open the Business Partner window, create a new partner with search key {value} and name {name}, and save. Report done.
+invariants:
+- id: no_duplicate_partner_keys
+  expect:
+    equals: 0
+  sql: SELECT count(*) FROM (SELECT value FROM c_bpartner WHERE ad_client_id = 11 GROUP BY value HAVING count(*) > 1) d
+- id: no_orphan_customer_accounts
+  expect:
+    equals: 0
+  sql: SELECT count(*) FROM c_bp_customer_acct a LEFT JOIN c_bpartner b ON b.c_bpartner_id = a.c_bpartner_id WHERE b.c_bpartner_id IS NULL
+goal:
+- id: partner_created
+  expect:
+    equals: 1
+  sql: SELECT count(*) FROM c_bpartner WHERE value = :value AND name = :name AND isactive = 'Y'
+frame:
+  unchanged:
+  - c_bpartner
+  - c_bp_customer_acct
+  - c_bp_vendor_acct
+  - c_bp_employee_acct
+  - c_bpartner_location
+  - ad_treenodebp
+  - m_product
+  - m_product_acct
+  - ad_treenodepr
+  allowed:
+  - table: c_bpartner
+    insert: 1
+  - table: ad_treenodebp
+    insert: 1
+  - table: c_bp_customer_acct
+    insert: 2
+  - table: c_bp_vendor_acct
+    insert: 2
