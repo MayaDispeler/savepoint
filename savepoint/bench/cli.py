@@ -30,7 +30,7 @@ def _external(app):
         from savepoint.adapters.openmrs import OpenMrsAdapter
         return OpenMrsAdapter(), "http://localhost:8080", lambda: None
     from savepoint.adapters.idempiere import IdempiereAdapter
-    return IdempiereAdapter(), "http://localhost:8081", lambda: None
+    return IdempiereAdapter(), "http://localhost:8080", lambda: None
 
 
 def main():

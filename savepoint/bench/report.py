@@ -9,7 +9,14 @@ ARM_NAMES = {"B": "B baseline (no Savepoint)", "S": "S atomic", "R": "R savepoin
 
 
 def build(ledger: Ledger, scripted: bool = True) -> dict:
-    m = metrics.compute(ledger.all_runs(), ledger.rows(rollbacks), ledger.rows(checkpoints))
+    all_runs, rbs, cps = ledger.all_runs(), ledger.rows(rollbacks), ledger.rows(checkpoints)
+    m = metrics.compute(all_runs, rbs, cps)
+    m["by_app"] = {}
+    for app in sorted({r["workflow_id"].split(".")[0] for r in all_runs}):
+        runs_a = [r for r in all_runs if r["workflow_id"].startswith(app + ".")]
+        ids = {r["id"] for r in runs_a}
+        m["by_app"][app] = metrics.compute(runs_a, [x for x in rbs if x["run_id"] in ids],
+                                           [x for x in cps if x["run_id"] in ids])
     m["agent"] = "scripted fault-injecting agent (not a language model)" if scripted else "language model"
     return m
 
@@ -45,8 +52,22 @@ def render(m: dict) -> str:
           "|---|" + "---|" * 10]
     for a, x in m["arms"].items():
         L.append(f"| {a} | " + " | ".join(f"{x['pass_hat_k'].get(str(k), float('nan')):.3f}" for k in range(1, 11)) + " |")
+    for app, am in m.get("by_app", {}).items():
+        L += ["", f"## By app: {app}", "", "| Arm | N | Valid success | Atomicity (Wilson 95%) | VS | VF | IS | IF | pass^1 | pass^5 |",
+              "|---|---|---|---|---|---|---|---|---|---|"]
+        for a, x in am["arms"].items():
+            lo, hi = x["atomicity_ci95"]
+            ph = x["pass_hat_k"]
+            L.append(f"| {ARM_NAMES.get(a, a)} | {x['n']} | {pct(x['valid_success'])} | {pct(x['atomicity'])} "
+                     f"({pct(lo)} to {pct(hi)}) | {x['VS']} | {x['VF']} | {x['IS']} | {x['IF']} | "
+                     f"{ph.get('1', float('nan')):.3f} | {ph.get('5', float('nan')):.3f} |")
+        c2 = am["catch"]
+        L.append("")
+        L.append(f"Arm S catch rate {pct(c2['catch_rate'])} ({c2['caught']} of {c2['false_claims']}); false alarms "
+                 f"{pct(c2['false_alarm_rate'])} ({c2['false_alarms']} of {c2['true_claims']}); restores exact "
+                 f"{am['fidelity']['exact']} of {am['fidelity']['restores']}.")
     c = m["catch"]
-    L += ["", "## False completions (arm S, single attempt)", "",
+    L += ["", "## False completions (arm S, single attempt, all apps)", "",
           f"- Catch rate: {pct(c['catch_rate'])} ({c['caught']} of {c['false_claims']} false `done` claims caught)",
           f"- False-alarm rate: {pct(c['false_alarm_rate'])} ({c['false_alarms']} of {c['true_claims']} true claims flagged)",
           "", "## Restore fidelity and cost", "",

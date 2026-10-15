@@ -31,16 +31,14 @@ function tile(r) {
 }
 
 function summary() {
-  const a = B.results.arms, S = a.S || {}, Bx = a.B || {};
+  const by = B.results.by_app || {};
   const fid = B.results.fidelity;
-  const k = (arm) => (arm && arm.pass_hat_k ? arm.pass_hat_k["10"] : null);
-  const s = [
-    ["Atomicity", `B ${pct(Bx.atomicity)} · S ${pct(S.atomicity)}`, "(VS + VF) / N"],
-    ["Valid success", `B ${pct(Bx.valid_success)} · S ${pct(S.valid_success)}`, "task done and state correct"],
-    ["pass^10", `B ${k(Bx)?.toFixed(3) ?? "n/a"} · S ${k(S)?.toFixed(3) ?? "n/a"}`, "ten fresh trials all succeed"],
-    ["Rollbacks exact", `${fid.exact} / ${fid.restores}`, "digest equals checkpoint after restore"],
-  ];
-  $("#summary").innerHTML = s.map(([t, v, h]) => `<div class="stat"><span>${t}</span><b>${v}</b><span>${h}</span></div>`).join("");
+  const cards = Object.entries(by).map(([app, R]) => {
+    const Bx = R.arms.B || {}, S = R.arms.S || {};
+    return [app, `B ${pct(Bx.atomicity)} → S ${pct(S.atomicity)}`, `atomicity · false done ${Bx.IS ?? 0} → ${S.IS ?? 0} of ${S.n ?? 0}`];
+  });
+  cards.push(["Rollbacks exact", `${fid.exact} / ${fid.restores}`, "digest equals checkpoint after restore"]);
+  $("#summary").innerHTML = cards.map(([t, v, h]) => `<div class="stat"><span>${esc(t)}</span><b>${v}</b><span>${h}</span></div>`).join("");
   $("#meta").textContent = `${B.agent} · ${B.runs.length} runs · generated ${B.generated}`;
 }
 
@@ -52,18 +50,25 @@ function viewRuns() {
   if (quarantined.length) {
     h += `<div class="card err"><h3>Quarantined (${quarantined.length})</h3><div class="grid" style="grid-template-columns:repeat(10,minmax(0,1fr))">${quarantined.map(tile).join("")}</div></div>`;
   }
-  for (const arm of ARMS) {
-    const runs = B.runs.filter((r) => r.arm === arm);
-    if (!runs.length) continue;
-    h += `<div class="card"><h3>Arm ${esc(ARM_NAME[arm])}</h3><div class="grid"><div class="muted">Workflow \\ trial</div>${[...Array(10).keys()].map((i) => `<div class="muted" style="text-align:center">${i + 1}</div>`).join("")}`;
-    for (const wf of wfs) {
-      h += `<div class="wf">${esc(wf)}</div>`;
-      for (let t = 1; t <= 10; t++) {
-        const r = runs.find((x) => x.workflow_id === wf && x.trial === t);
-        h += r ? `<div>${tile(r)}</div>` : "<div></div>";
+  const apps = [...new Set(B.runs.map((r) => r.workflow_id.split(".")[0]))];
+  for (const app of apps) {
+    const appRuns = B.runs.filter((r) => r.workflow_id.startsWith(app + "."));
+    const T = Math.max(...appRuns.map((r) => r.trial));
+    const cols = `style="grid-template-columns:260px repeat(${T},minmax(0,1fr))"`;
+    h += `<h2 style="margin:24px 0 8px">${esc(APP_NAME[app] || app)}</h2>`;
+    for (const arm of ARMS) {
+      const runs = appRuns.filter((r) => r.arm === arm);
+      if (!runs.length) continue;
+      h += `<div class="card"><h3>Arm ${esc(ARM_NAME[arm])}</h3><div class="grid" ${cols}><div class="muted">Workflow \ trial</div>${[...Array(T).keys()].map((i) => `<div class="muted" style="text-align:center">${i + 1}</div>`).join("")}`;
+      for (const wf of wfs.filter((w) => w.startsWith(app + "."))) {
+        h += `<div class="wf">${esc(wf)}</div>`;
+        for (let t = 1; t <= T; t++) {
+          const r = runs.find((x) => x.workflow_id === wf && x.trial === t);
+          h += r ? `<div>${tile(r)}</div>` : "<div></div>";
+        }
       }
+      h += "</div></div>";
     }
-    h += "</div></div>";
   }
   return h;
 }
@@ -102,13 +107,20 @@ function viewRun(id) {
 
 function line(points, cls) { return points.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" "); }
 
+const APP_NAME = { claimdesk: "ClaimDesk 98 (synthetic claims app)", openmrs: "OpenMRS 2.12 (real hospital record system)", idempiere: "iDempiere 13 (real ERP)" };
 function viewBenchmark() {
-  const arms = B.results.arms, W = 720, H = 300, L = 48, Rr = 90, T = 16, Bt = 36;
-  const x = (k) => L + ((k - 1) / 9) * (W - L - Rr), y = (v) => T + (1 - v) * (H - T - Bt);
+  const by = B.results.by_app || { all: B.results };
+  return Object.entries(by).map(([app, R]) => benchApp(app, R)).join("");
+}
+
+function benchApp(app, R) {
+  const arms = R.arms, W = 720, H = 300, L = 48, Rr = 90, T = 16, Bt = 36;
+  const K = Math.max(2, ...Object.values(arms).map((a) => Object.keys(a.pass_hat_k).length));
+  const x = (k) => L + ((k - 1) / (K - 1)) * (W - L - Rr), y = (v) => T + (1 - v) * (H - T - Bt);
   const style = { B: 'stroke="#14181D" stroke-dasharray="6 4"', S: 'stroke="#2447C9"', R: 'stroke="#2447C9" stroke-dasharray="2 3"' };
   let g = "";
   for (let v = 0; v <= 1.001; v += 0.25) g += `<line x1="${L}" x2="${W - Rr}" y1="${y(v)}" y2="${y(v)}" stroke="#DCE0E6"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${v.toFixed(2)}</text>`;
-  for (let k = 1; k <= 10; k++) g += `<text x="${x(k)}" y="${H - 14}" text-anchor="middle">${k}</text>`;
+  for (let k = 1; k <= K; k++) g += `<text x="${x(k)}" y="${H - 14}" text-anchor="middle">${k}</text>`;
   g += `<text x="${(L + W - Rr) / 2}" y="${H}" text-anchor="middle">k fresh trials in a row</text>`;
   const same = (a, b) => arms[a] && arms[b] && JSON.stringify(arms[a].pass_hat_k) === JSON.stringify(arms[b].pass_hat_k);
   const labelled = [];
@@ -128,9 +140,9 @@ function viewBenchmark() {
     bars += `<text class="lab" x="0" y="${yy + 14}">${a}</text><rect x="30" y="${yy}" width="${w}" height="20" fill="#F5F6F8" stroke="#DCE0E6"/><rect x="30" y="${yy}" width="${w * m.atomicity}" height="20" fill="${a === "B" ? "#14181D" : "#2447C9"}"/><line x1="${30 + w * lo}" x2="${30 + w * hi}" y1="${yy + 10}" y2="${yy + 10}" stroke="#B3261E" stroke-width="3"/><text x="${40 + w}" y="${yy + 15}">${pct(m.atomicity)} (${pct(lo)} to ${pct(hi)})</text>`;
   });
   const rows = ARMS.filter((a) => arms[a]).map((a) => { const m = arms[a]; return `<tr><td>${esc(ARM_NAME[a])}</td><td class="num">${m.n}</td><td class="num">${m.VS}</td><td class="num">${m.VF}</td><td class="num">${m.IS}</td><td class="num">${m.IF}</td><td class="num">${pct(m.valid_success)}</td><td class="num">${pct(m.atomicity)}</td></tr>`; }).join("");
-  const c = B.results.catch, t = B.results.timings, f = B.results.fidelity;
-  return `<div class="card"><h2>pass^k</h2><p class="muted">Mean over workflows of the chance that k fresh trials all succeed. Dashed ink = B baseline, solid blue = S atomic, dotted blue = R retry. B and S overlap when they finish the same runs: Savepoint changes what the failed runs leave behind (see atomicity below), not how many succeed.</p>
-    <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="pass^k for k = 1 to 10 by arm">${g}</svg></div>
+  const c = R.catch, t = R.timings, f = R.fidelity;
+  return `<h2 style="margin:24px 0 8px">${esc(APP_NAME[app] || app)}</h2><div class="card"><h2>pass^k</h2><p class="muted">Mean over workflows of the chance that k fresh trials all succeed. Dashed ink = B baseline, solid blue = S atomic, dotted blue = R retry. B and S overlap when they finish the same runs: Savepoint changes what the failed runs leave behind (see atomicity below), not how many succeed.</p>
+    <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="pass^k by arm">${g}</svg></div>
     <div class="card"><h2>Atomicity with Wilson 95% interval</h2><svg class="chart" viewBox="0 0 ${W} 150" role="img" aria-label="Atomicity by arm">${bars}</svg></div>
     <div class="card"><h2>Outcome table</h2><table><thead><tr><th>Arm</th><th class="num">N</th><th class="num">Done (VS)</th><th class="num">Clean fail (VF)</th><th class="num">False done (IS)</th><th class="num">Dirty fail (IF)</th><th class="num">Valid success</th><th class="num">Atomicity</th></tr></thead><tbody>${rows}</tbody></table></div>
     <div class="card"><h2>Metrics</h2><table><tbody>
@@ -138,8 +150,8 @@ function viewBenchmark() {
       <tr><th>False-alarm rate (arm S)</th><td>${pct(c.false_alarm_rate)} (${c.false_alarms} of ${c.true_claims})</td></tr>
       <tr><th>Restore fidelity</th><td>${f.exact} of ${f.restores} exact</td></tr>
       <tr><th>Checkpoint p95 / restore p95</th><td>${t.checkpoint_p95_ms} ms / ${t.restore_p95_ms} ms (${t.checkpoints} checkpoints)</td></tr>
-      <tr><th>Checkpoint and restore share of run time</th><td>${pct(B.results.overhead.checkpoint_restore_share_of_wall)}</td></tr></tbody></table>
-    <p class="muted">Assumptions: ${esc(B.agent)}; app: ClaimDesk 98 (synthetic, Faker seed 42); ten workflows x ten trials per arm; faults injected on trials 7 to 10, paired across arms. These numbers show runtime behaviour on a known failure mix. They are not a model's reliability.</p></div>`;
+      <tr><th>Checkpoint and restore share of run time</th><td>${pct(R.overhead.checkpoint_restore_share_of_wall)}</td></tr></tbody></table>
+    <p class="muted">Assumptions: ${esc(B.agent)}; ${esc(APP_NAME[app] || app)}; ${arms.B ? arms.B.workflows : "?"} workflows x ${arms.B ? arms.B.trials_per_workflow : "?"} trials per arm; faults injected on a fixed schedule, paired across arms. These numbers show runtime behaviour on a known failure mix. They are not a model's reliability.</p></div>`;
 }
 
 function viewWorkflows() {

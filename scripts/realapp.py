@@ -21,7 +21,7 @@ def make(app):
         from savepoint.adapters.openmrs import OpenMrsAdapter
         return OpenMrsAdapter(), "http://localhost:8080"
     from savepoint.adapters.idempiere import IdempiereAdapter
-    return IdempiereAdapter(), "http://localhost:8081"
+    return IdempiereAdapter(), "http://localhost:8080"
 
 
 def run_steps(ctx, steps_agent):
