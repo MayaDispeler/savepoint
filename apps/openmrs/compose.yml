@@ -29,3 +29,5 @@ services:
       DB_CREATE_TABLES: "true"
       DB_AUTO_UPDATE: "true"
       MODULE_WEB_ADMIN: "true"
+      # DB-level restores bypass Hibernate; without these a restored row can still look voided in the UI.
+      CATALINA_OPTS: "-Dhibernate.cache.use_second_level_cache=false -Dhibernate.cache.use_query_cache=false"

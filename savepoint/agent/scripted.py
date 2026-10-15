@@ -72,9 +72,15 @@ def golden_steps(workflow_id: str, p: dict) -> list[dict]:
     raise KeyError(workflow_id)
 
 
-def fault_for(trial: int, workflow_id: str) -> str:
-    """Deterministic, paired across arms: trials 1-6 clean, 7 stop_at, 8 wrong_value, 9 skip_save, 10 done_early."""
-    return {7: "stop_at", 8: "wrong_value", 9: "skip_save", 10: "done_early"}.get(trial, "none")
+FAULT_SCHEDULES = {
+    10: {7: "stop_at", 8: "wrong_value", 9: "skip_save", 10: "done_early"},  # trials 1-6 clean
+    5: {3: "stop_at", 4: "wrong_value", 5: "skip_save"},                     # trials 1-2 clean (slow real apps)
+}
+
+
+def fault_for(trial: int, workflow_id: str, trials: int = 10) -> str:
+    """Deterministic, paired across arms."""
+    return FAULT_SCHEDULES[trials].get(trial, "none")
 
 
 class ScriptedAgent:

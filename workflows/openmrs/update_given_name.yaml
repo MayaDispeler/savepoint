@@ -44,4 +44,5 @@ frame:
     - date_voided
     - void_reason
     - changed_by
+    - preferred
     insert: 1

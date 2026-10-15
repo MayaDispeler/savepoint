@@ -88,8 +88,8 @@ def steps(slug: str, p: dict) -> list[dict]:
                 {"type": "fill", "selector": "#w16", "value": "16"}, NEXT,
                 {"type": "fill", "selector": "#w18", "value": "120"},
                 {"type": "fill", "selector": "#w20", "value": "80"},
-                {"type": "click_until", "selector": "#next-button", "until": "#confirm-submit, #registration-submit, #submit, button:has-text('Confirm')"},
-                {"type": "click", "selector": "#registration-submit, #submit, #confirm-submit, button:has-text('Confirm'):visible", "commit": True},
+                {"type": "click_until", "selector": "#next-button", "until": "button:has-text('Save'):visible"},
+                {"type": "click", "selector": "button:has-text('Save'):visible", "commit": True},
                 {"type": "wait", "ms": 3000}]
     if slug == "lookup_patient":
         return [goto(DASH.format(pid=pid)), {"type": "wait", "ms": 500}]

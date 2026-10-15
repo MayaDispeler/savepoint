@@ -19,7 +19,8 @@ class OpenMrsAdapter(SqlAdapter):
     }
     volatile_columns: ClassVar[dict[str, list[str]]] = {
         "person": [*_VOL], "person_name": [*_VOL], "person_address": [*_VOL], "person_attribute": [*_VOL],
-        "patient": [*_VOL], "patient_identifier": [*_VOL],
+        "patient": [*_VOL],
+        "patient_identifier": [*_VOL, "identifier"],  # OpenMRS ID is generated from a sequence the restore does not rewind
         "visit": [*_VOL, "date_started", "date_stopped"],
         "encounter": [*_VOL, "encounter_datetime"], "obs": [*_VOL, "obs_datetime"],
         "allergy": [*_VOL], "allergy_reaction": ["uuid"], "relationship": [*_VOL],

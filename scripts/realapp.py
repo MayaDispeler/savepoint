@@ -31,7 +31,11 @@ def run_steps(ctx, steps_agent):
         a = steps_agent.next_action(None)
         if isinstance(a, Terminal):
             return page
-        act.execute(a)
+        try:
+            act.execute(a)
+        except Exception as e:
+            page.screenshot(path="/tmp/fail.png")
+            raise RuntimeError(f"step failed {a}: {str(e)[:120]}") from e
 
 
 def seed(app):
@@ -76,7 +80,8 @@ def test(app, only=None):
             adapter.snapshot_db(snap)
             agent = ScriptedAgent(c.id, c.params, "none", base_url=base)
             try:
-                run_steps(ctx, agent)
+                pg = run_steps(ctx, agent)
+                pg.screenshot(path='/tmp/end.png')
                 g = evaluator.check(c, "goal", adapter)
                 f = evaluator.check(c, "frame", adapter, s0, snap)
                 bad = [x for x in g + f if not x.passed]

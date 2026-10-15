@@ -33,7 +33,7 @@ def run_benchmark(ledger: Ledger, make_ctx, contracts, arms=("B", "S", "R"), tri
                 if max_runs is not None and executed >= max_runs:
                     return executed
                 ctx = make_ctx()
-                fault = fault_for(trial, c.id)
+                fault = fault_for(trial, c.id, trials)
                 agent = ScriptedAgent(c.id, c.params, fault, base_url=ctx.base_url)
                 res = run_workflow(c, arm, agent, trial, ctx, goldens[c.id], fault)
                 ledger.record_run(res["run"], res["steps"], res["checkpoints"], res["validations"],
