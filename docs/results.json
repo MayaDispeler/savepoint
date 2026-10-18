@@ -1,100 +1,100 @@
 {
   "arms": {
     "B": {
-      "n": 150,
-      "VS": 100,
-      "VF": 2,
-      "IS": 45,
+      "n": 200,
+      "VS": 126,
+      "VF": 10,
+      "IS": 61,
       "IF": 3,
       "atomicity": 0.68,
       "atomicity_ci95": [
-        0.6016545135045653,
-        0.7493558764029761
+        0.612479733946457,
+        0.7407357039229475
       ],
-      "valid_success": 0.6666666666666666,
-      "invalid_success_rate": 0.3,
-      "unsafe_side_effect_rate": 0.02,
+      "valid_success": 0.63,
+      "invalid_success_rate": 0.305,
+      "unsafe_side_effect_rate": 0.015,
       "pass_hat_k": {
-        "1": 0.65,
-        "2": 0.40499999999999997,
-        "3": 0.2475,
-        "4": 0.16071428571428573,
-        "5": 0.12857142857142856
+        "1": 0.6066666666666667,
+        "2": 0.36333333333333334,
+        "3": 0.23166666666666666,
+        "4": 0.1738095238095238,
+        "5": 0.15238095238095237
       },
-      "workflows": 20,
+      "workflows": 30,
       "trials_per_workflow": 5
     },
     "R": {
-      "n": 150,
-      "VS": 145,
-      "VF": 5,
+      "n": 200,
+      "VS": 172,
+      "VF": 28,
       "IS": 0,
       "IF": 0,
       "atomicity": 1.0,
       "atomicity_ci95": [
-        0.9750288608542812,
+        0.9811539940816791,
         1.0
       ],
-      "valid_success": 0.9666666666666667,
+      "valid_success": 0.86,
       "invalid_success_rate": 0.0,
       "unsafe_side_effect_rate": 0.0,
       "pass_hat_k": {
-        "1": 0.9650000000000001,
-        "2": 0.93,
-        "3": 0.8949999999999999,
-        "4": 0.86,
-        "5": 0.825
+        "1": 0.8233333333333334,
+        "2": 0.7200000000000001,
+        "3": 0.6666666666666666,
+        "4": 0.64,
+        "5": 0.6166666666666667
       },
-      "workflows": 20,
+      "workflows": 30,
       "trials_per_workflow": 5
     },
     "S": {
-      "n": 150,
-      "VS": 100,
-      "VF": 50,
+      "n": 200,
+      "VS": 126,
+      "VF": 74,
       "IS": 0,
       "IF": 0,
       "atomicity": 1.0,
       "atomicity_ci95": [
-        0.9750288608542812,
+        0.9811539940816791,
         1.0
       ],
-      "valid_success": 0.6666666666666666,
+      "valid_success": 0.63,
       "invalid_success_rate": 0.0,
       "unsafe_side_effect_rate": 0.0,
       "pass_hat_k": {
-        "1": 0.65,
-        "2": 0.40499999999999997,
-        "3": 0.2475,
-        "4": 0.16071428571428573,
-        "5": 0.12857142857142856
+        "1": 0.6066666666666667,
+        "2": 0.36333333333333334,
+        "3": 0.23166666666666666,
+        "4": 0.1738095238095238,
+        "5": 0.15238095238095237
       },
-      "workflows": 20,
+      "workflows": 30,
       "trials_per_workflow": 5
     }
   },
   "catch": {
-    "false_claims": 43,
-    "caught": 43,
+    "false_claims": 59,
+    "caught": 59,
     "catch_rate": 1.0,
-    "true_claims": 100,
+    "true_claims": 126,
     "false_alarms": 0,
     "false_alarm_rate": 0.0
   },
   "fidelity": {
-    "restores": 100,
-    "exact": 100,
+    "restores": 163,
+    "exact": 163,
     "exact_rate": 1.0
   },
   "overhead": {
-    "checkpoint_restore_share_of_wall": 0.05068400096620877,
-    "mean_wall_ms_B": 2234.28,
-    "mean_wall_ms_S": 2575.653333333333
+    "checkpoint_restore_share_of_wall": 0.0362328778711164,
+    "mean_wall_ms_B": 5593.365,
+    "mean_wall_ms_S": 6051.115
   },
   "timings": {
-    "checkpoint_p95_ms": 64,
-    "restore_p95_ms": 525,
-    "checkpoints": 541
+    "checkpoint_p95_ms": 114,
+    "restore_p95_ms": 568,
+    "checkpoints": 769
   },
   "quarantined": 0,
   "by_app": {
@@ -210,6 +210,106 @@
         "checkpoint_p95_ms": 47,
         "restore_p95_ms": 94,
         "checkpoints": 379
+      },
+      "quarantined": 0
+    },
+    "idempiere": {
+      "arms": {
+        "B": {
+          "n": 50,
+          "VS": 26,
+          "VF": 8,
+          "IS": 16,
+          "IF": 0,
+          "atomicity": 0.68,
+          "atomicity_ci95": [
+            0.5418944286372394,
+            0.792419559060006
+          ],
+          "valid_success": 0.52,
+          "invalid_success_rate": 0.32,
+          "unsafe_side_effect_rate": 0.0,
+          "pass_hat_k": {
+            "1": 0.52,
+            "2": 0.27999999999999997,
+            "3": 0.2,
+            "4": 0.2,
+            "5": 0.2
+          },
+          "workflows": 10,
+          "trials_per_workflow": 5
+        },
+        "R": {
+          "n": 50,
+          "VS": 27,
+          "VF": 23,
+          "IS": 0,
+          "IF": 0,
+          "atomicity": 1.0,
+          "atomicity_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "valid_success": 0.54,
+          "invalid_success_rate": 0.0,
+          "unsafe_side_effect_rate": 0.0,
+          "pass_hat_k": {
+            "1": 0.54,
+            "2": 0.3,
+            "3": 0.21000000000000002,
+            "4": 0.2,
+            "5": 0.2
+          },
+          "workflows": 10,
+          "trials_per_workflow": 5
+        },
+        "S": {
+          "n": 50,
+          "VS": 26,
+          "VF": 24,
+          "IS": 0,
+          "IF": 0,
+          "atomicity": 1.0,
+          "atomicity_ci95": [
+            0.9286499658256813,
+            1.0
+          ],
+          "valid_success": 0.52,
+          "invalid_success_rate": 0.0,
+          "unsafe_side_effect_rate": 0.0,
+          "pass_hat_k": {
+            "1": 0.52,
+            "2": 0.27999999999999997,
+            "3": 0.2,
+            "4": 0.2,
+            "5": 0.2
+          },
+          "workflows": 10,
+          "trials_per_workflow": 5
+        }
+      },
+      "catch": {
+        "false_claims": 16,
+        "caught": 16,
+        "catch_rate": 1.0,
+        "true_claims": 26,
+        "false_alarms": 0,
+        "false_alarm_rate": 0.0
+      },
+      "fidelity": {
+        "restores": 63,
+        "exact": 63,
+        "exact_rate": 1.0
+      },
+      "overhead": {
+        "checkpoint_restore_share_of_wall": 0.029512830519021652,
+        "mean_wall_ms_B": 15670.62,
+        "mean_wall_ms_S": 16477.5
+      },
+      "timings": {
+        "checkpoint_p95_ms": 131,
+        "restore_p95_ms": 610,
+        "checkpoints": 228
       },
       "quarantined": 0
     },

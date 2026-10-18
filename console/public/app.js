@@ -89,7 +89,7 @@ function viewRun(id) {
   }
   for (const rb of rbs) tl += `<li class="end">↺ restored to ${esc(rb.checkpoint_id.split(":")[1] === "0" ? "S0" : "step " + rb.checkpoint_id.split(":")[1])} (${esc(rb.reason.replace("_", " "))})</li>`;
   if (r.sp_outcome === "committed" || r.sp_outcome === "retried_committed") tl += `<li class="end">✓ committed</li>`;
-  const checks = vals.length ? vals.map((v) => `<div class="chk ${v.passed ? "" : "bad"}"><b>${v.passed ? "Pass" : "Fail"}</b><span>${esc(v.check_id)} (${esc(v.phase)})${v.passed ? "" : ` expected ${esc(JSON.stringify(v.expected))}, got ${esc(JSON.stringify(v.observed))}`}</span></div>`).join("") : `<p class="muted">Arm B runs no validators.</p>`;
+  const checks = vals.length ? vals.map((v) => `<div class="chk ${v.passed ? "" : "bad"}"><b>${v.passed ? "Pass" : "Fail"}</b><span>${esc(v.check_id)} (${esc(v.phase)})${v.passed ? "" : ` expected ${esc(JSON.stringify(v.expected))}, got ${esc(JSON.stringify(v.observed))}`}</span></div>`).join("") : `<p class="muted">${r.arm === "B" ? "Arm B runs no validators." : "No validator ran: the run ended before any state change or done claim, so Savepoint only restored the checkpoint."}</p>`;
   let rbHtml = "";
   for (const rb of rbs) {
     rbHtml += `<h3>Rollback · ${esc(rb.reason.replace("_", " "))} · from step ${rb.from_step}</h3>`;

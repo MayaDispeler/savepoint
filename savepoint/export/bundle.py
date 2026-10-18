@@ -30,16 +30,18 @@ def pick_featured(all_runs: list[dict], rbs: list[dict]) -> list[str]:
     by_run = {}
     for r in rbs:
         by_run.setdefault(r["run_id"], r)
-    seen, out = set(), []
+    seen, out, per_app = set(), [], {}
     order = sorted(all_runs, key=lambda r: (r["arm"] != "S", r["workflow_id"], r["trial"]))
     for r in order:
         rb = by_run.get(r["id"])
         if not rb or not rb.get("shot_after"):
             continue
-        key = (r["fault"], rb["reason"], r["arm"])
-        if key in seen:
+        app = r["workflow_id"].split(".")[0]
+        key = (app, r["fault"], rb["reason"], r["arm"])
+        if key in seen or per_app.get(app, 0) >= MAX_FEATURED // 3:  # spread the featured runs over the apps
             continue
         seen.add(key)
+        per_app[app] = per_app.get(app, 0) + 1
         out.append(r["id"])
         if len(out) == MAX_FEATURED:
             break
