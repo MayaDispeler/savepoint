@@ -224,12 +224,18 @@ def _drive(ctx, agent, act, total, steps_rows):
     prev = _sha(adapter.digest())
     n = 0
     while n < ctx.step_budget:
-        action = agent.next_action(None)
+        try:
+            action = agent.next_action(None)
+        except Exception:  # noqa: BLE001 - an agent error during a retry ends the run as an error
+            return "error", None
         if isinstance(action, Terminal):
             return action.status, action
         n += 1
         t0 = time.monotonic()
-        act.execute(action)
+        try:
+            act.execute(action)
+        except Exception:  # noqa: BLE001 - a UI failure during a retry is an error outcome, never a crash
+            return "error", None
         cur = _sha(adapter.digest())
         steps_rows.append({"idx": total + n, "action": action, "element": None, "risky": False,
                            "state_changed": cur != prev, "screenshot": None,

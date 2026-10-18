@@ -71,3 +71,33 @@ def test_risky_checkpoint_dedupe(live, golden):  # V10
     r = run(live, golden, "adjust_amount", "S", "none")
     kinds = [(c["kind"], c["step_idx"]) for c in r["checkpoints"]]
     assert kinds[0] == ("initial", 0) and len(kinds) == 3  # S0, save click, save-note click
+
+
+def test_ui_failure_during_retry_is_an_error_outcome_not_a_crash(live, golden):
+    """Regression: a Playwright timeout while driving a retry used to propagate and kill the whole benchmark."""
+    from savepoint.agent.actuator import Actuator
+
+    c = contract("adjust_amount")
+    agent = ScriptedAgent(c.id, c.params, "skip_save", base_url=live.url)  # first attempt is a false completion
+    real = Actuator.execute
+    state = {"retry": False}
+
+    def flaky(self, action):
+        if state["retry"] and action["type"] == "fill":
+            raise TimeoutError("selector never appeared")
+        return real(self, action)
+
+    orig_notify = agent.notify
+
+    def notify(msg, restored=0):
+        state["retry"] = True
+        orig_notify(msg, restored)
+
+    agent.notify = notify
+    Actuator.execute = flaky
+    try:
+        res = run_workflow(c, "R", agent, 1, live(), golden["adjust_amount"], "skip_save")["run"]
+    finally:
+        Actuator.execute = real
+    assert res["agent_status"] == "error" and res["sp_outcome"] == "rolled_back"
+    assert res["oracle"] == "VF"  # state restored, nothing left behind

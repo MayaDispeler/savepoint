@@ -46,7 +46,7 @@ def steps(slug: str, p: dict) -> list[dict]:
     if slug == "mark_as_vendor":
         return open_record(BP, p["value"]) + [click("label:text-is('Vendor') >> visible=true"), WAIT(1000)] + save()
     if slug == "deactivate_business_partner":
-        return open_record(BP, p["value"]) + [click("label:text-is('Active') >> visible=true"), WAIT(1000)] + save()
+        return open_record(BP, p["value"]) + [click("label:text-is('Active') >> visible=true"), WAIT(1000)] + save() + [WAIT(6000)]  # deactivation cascades; commit lands late
     if slug == "delete_business_partner":
         return open_record(BP, p["value"]) + [
             click("a[title^='Delete Record']"), WAIT(2500),
