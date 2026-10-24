@@ -1,8 +1,11 @@
 # Putting Savepoint in your portfolio
 
 Savepoint is already a finished, hosted app. You do **not** need to rebuild anything in the portfolio. The portfolio
-only needs a card and a short case-study page that send people to the live app, where the "Try it" tab lets them
-experience the idea in about 60 seconds. The test results are in the same app, on the other tabs.
+only needs a card and a short case-study page that send people to the live app, where the "Try it" page lets them
+experience the idea in about 60 seconds. The test results are in the same app, on the other pages.
+
+**Hand this file to the portfolio window as the single source.** Everything to paste is in sections 3, 4 and 5; the
+asset brief for better visuals is section 6; the ready-made prompt is section 7.
 
 ## 1. The links
 
@@ -86,9 +89,11 @@ Cloudflare Workers (static assets), Hugging Face Spaces, GitHub Actions.
 
 ### The honest-limits box (put this on the page, near the numbers)
 
-- The agent in every test is a **script that fails on purpose**, not an AI model. The numbers show what Savepoint does
-  with known failures. They do not measure how reliable any AI model is.
-- The "live Claude run" was **simulated** through the real agent loop. No model was called and nothing was spent.
+- The agent in every test is a **script that fails on purpose**, not an AI model. Real agents fail in the same four ways
+  (stop halfway, type a wrong value, skip the final save, say "done" too early); a script makes those failures repeatable
+  and the comparison fair. The numbers show what Savepoint does once a failure happens. They do not measure how often any
+  AI model fails.
+- A test with a real model is **not done yet**. The "live Claude run" was simulated through the real agent loop: no model was called and nothing was spent.
 - ClaimDesk 98 is a fake app I built for safe testing. OpenMRS and iDempiere are real open-source apps run with their demo data.
 - The real apps ran 5 trials per task (10 on ClaimDesk). iDempiere's screens were slow and flaky: 15 of its 150 runs ended in a UI timeout and were rolled back cleanly.
 - Rollback covers the tables a contract monitors, not the whole database. Apps with outside effects (email, payments) are out of scope.
@@ -118,22 +123,39 @@ and on OpenMRS to 96%, but only to 54% on iDempiere because of its UI timeouts.
 | `1-overview.png` | Overview page, if you want a wide product shot |
 | `savepoint-walkthrough.webm` | Short tour: Try it, test results, benchmark (autoplay muted loop works well on the card) |
 
-## 6. Prompt for the Claude window that edits the portfolio
+## 6. Brief for making better visuals (for the window that generates assets)
+
+The screenshots in section 5 are real and accurate; use them as the reference for content. If you generate nicer visuals,
+keep every fact below true. Do not add numbers, logos, quotes or screens that are not in the app.
+
+| Asset | What it must show | Must not |
+|---|---|---|
+| Hero / card image (16:9) | Left: a record showing amount 980.00, notes none, with the agent saying "done" (wrong). Right: the same record restored by Savepoint with "Safe fail" or "Correct". Caption: "Without Savepoint / With Savepoint" | Show a person, a robot brand, or a real company's UI |
+| Concept diagram | Timeline: checkpoint, agent steps, checkpoint before a risky click, agent says done, check fails, restore the checkpoint, proof (0 rows different) | Imply the agent is an AI model in the tests |
+| Results strip | Three rows (ClaimDesk, OpenMRS, iDempiere): ended clean 70% / 64% / 68% without, 100% with; false "done" 27 / 18 / 16 without, 0 with | Round or change a number |
+| Outcome legend | Correct (check), Safe fail (undo arrow), False done (alert), Mess left (x). Icon plus word, never colour alone | Use colour as the only cue |
+| Short loop (6 to 10 s) | Screen recording of `#/try?fault=skip_save&prot=off` then the same with `prot=savepoint` | Fake the replay; record the live page |
+
+Palette to match the app: white #FFFFFF, rail #F9FAFB, ink #101828, blue #1D4ED8 (Savepoint acted), green #067647
+(correct), red #B42318 (wrong), amber #B54708 (caution). Font: Inter. Keep the "scripted agent, not an AI model" note
+visible wherever results numbers appear.
+
+## 7. Prompt for the Claude window that edits the portfolio
 
 > Add a Savepoint project card and a case-study page at `/projects/savepoint`, following the existing project pages.
 > Do not build or embed a new app: Savepoint is already hosted. Use the copy and numbers in
-> `Savepoint/savepoint-repo/docs/PORTFOLIO.md` exactly (section 3 and 4), including the honest-limits box. Buttons:
-> "Try it live" → https://savepoint-demo.ksvhari007.workers.dev (primary), "Code" → https://github.com/MayaDispeler/savepoint,
-> "Space" → https://huggingface.co/spaces/SrihariV/savepoint. Use the images from `docs/portfolio-assets/` (convert to
-> WebP), the portfolio's own design tokens, one page scroll (no scrolling boxes), and reduced-motion-safe video.
-> Do not invent numbers, quotes or links, and ask me before any pivotal decision.
+> `Savepoint/savepoint-repo/docs/PORTFOLIO.md` exactly (sections 3 and 4), including the honest-limits box. Buttons:
+> "Try it live" → https://savepoint-demo.ksvhari007.workers.dev/#/try (primary), "Code" → https://github.com/MayaDispeler/savepoint,
+> "Space" → https://huggingface.co/spaces/SrihariV/savepoint. Use the visuals described in section 6 (or the files in
+> `docs/portfolio-assets/`, converted to WebP), the portfolio's own design tokens, one page scroll (no scrolling boxes),
+> and reduced-motion-safe video. Do not invent numbers, quotes or links, and ask me before any pivotal decision.
 
-## 7. After you add it
+## 8. After you add it
 
 - In `Raw Documents and plans/portfolio-tracker.html` the Savepoint row is already Complete, Live, 100%. Nothing to change there.
 - If you add the custom domain, replace the `workers.dev` link in the portfolio, in `README.md`, and in the Savepoint `tracker.html` Key facts.
 
-## 8. If you want the experience to change later
+## 9. If you want the experience to change later
 
 - The Try it data comes from `scripts/make_experience_data.py` (re-run it to record fresh runs; about 3 minutes, needs Chromium).
 - The page itself is `console/public/try.js`. Deploy with `cd worker && npx wrangler deploy`, and mirror to Hugging Face with
