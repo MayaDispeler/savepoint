@@ -3,25 +3,48 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Savepoint</title>
-<meta name="description" content="Try it: see what happens when an AI agent fails halfway on old software, with and without Savepoint. Plus 600 test runs.">
+<title>Savepoint: undo for AI agents</title>
+<meta name="description" content="Try it: see what happens when an AI agent fails halfway on old software, with and without Savepoint. Then explore 600 recorded test runs on three apps.">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="top">
-  <div class="brand">SAVEPOINT</div>
-  <nav id="nav" aria-label="Views">
-    <button class="tab" data-view="try">Try it</button>
-    <button class="tab" data-view="runs">Test results</button>
-    <button class="tab" data-view="benchmark">Benchmark</button>
-    <button class="tab" data-view="workflows">Workflows</button>
-  </nav>
-  <div id="meta" class="meta"></div>
-</header>
-<section id="summary" class="summary" aria-label="Headline numbers"></section>
-<main id="view" tabindex="-1"></main>
+<!--
+THESIS: A white, calm operations console that teaches while it shows: every page says what it is, how to read it and
+what to do next; the Try it page lets a visitor break an agent and undo it. It refuses the dashboard of hero numbers.
+OWN-WORLD: white content ground, #F9FAFB navigation rail, hairline #E4E7EC borders, one blue (#1D4ED8) for "Savepoint acted",
+green/red/amber only as result and caution roles, Inter, icon plus word on every outcome.
+STORY: A visitor understands the problem in 20 seconds, breaks and rescues an agent in 60, then trusts the evidence.
+FIRST VIEWPORT: left rail with brand + 3 groups; right: title, two-sentence plain explanation, primary "Try it" button, then the 3-step flow.
+FORM: pinned by the owner (left navigation, white, professional); no concept roll.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance.
+-->
+<a class="skip" href="#main">Skip to content</a>
+<div class="app">
+  <header class="top">
+    <a class="brand" href="#/"><span class="mark" id="mark-top"></span><b>Savepoint</b></a>
+    <button class="btn sm" id="menu" type="button" aria-expanded="false" aria-controls="side">Menu</button>
+  </header>
+  <aside class="side" id="side" aria-label="Main navigation">
+    <a class="brand" href="#/"><span class="mark" id="mark"></span><span><b>Savepoint</b><small>Undo for AI agents</small></span></a>
+    <nav class="nav" id="nav" aria-label="Pages"></nav>
+    <div class="side-foot">
+      <div class="honest"><b>Read this first.</b> The agent in every test is a script that fails on purpose, not an AI model.</div>
+      <a href="https://github.com/MayaDispeler/savepoint" target="_blank" rel="noopener" id="l-gh"></a>
+      <a href="https://huggingface.co/spaces/SrihariV/savepoint" target="_blank" rel="noopener" id="l-hf"></a>
+    </div>
+  </aside>
+  <div class="main">
+    <main id="main" tabindex="-1" class="page"></main>
+    <footer class="foot">
+      <span>Savepoint v1.0.0</span>
+      <span>Scripted agent, not a language model. Data: 600 recorded runs.</span>
+      <a href="https://github.com/MayaDispeler/savepoint" target="_blank" rel="noopener">Source code (MIT)</a>
+    </footer>
+  </div>
+</div>
 <script src="data/bundle.js"></script>
 <script src="data/experience.js"></script>
+<script src="icons.js"></script>
 <script src="try.js"></script>
 <script src="app.js"></script>
 </body>
