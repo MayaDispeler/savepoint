@@ -7,9 +7,9 @@ nothing undoes the damage. Savepoint adds a transaction layer around the agent: 
 steps, checks a goal contract when the agent says "done", rolls back on failure or false completion, and proves
 each restore exact with a state diff.
 
-**Try it live:** https://savepoint-demo.ksvhari007.workers.dev (opens on an interactive "break the agent, then undo it" tab; the 600 test runs are on the other tabs). Mirror: https://huggingface.co/spaces/SrihariV/savepoint. For the portfolio: [docs/PORTFOLIO.md](docs/PORTFOLIO.md).
+**Try it live:** https://savepoint-demo.ksvhari007.workers.dev (left navigation: Overview, an interactive "break the agent, then undo it" page, the 600 test runs, benchmark, tasks and rules, guide). Mirror: https://huggingface.co/spaces/SrihariV/savepoint. For the portfolio: [docs/PORTFOLIO.md](docs/PORTFOLIO.md).
 
-![Try it tab](docs/portfolio-assets/2-with-savepoint.png)
+![Try it page](docs/portfolio-assets/3-try-with-savepoint.png)
 
 <!-- RESULTS:START -->
 ## Results (scripted agent, not a language model)

@@ -8,7 +8,10 @@ experience the idea in about 60 seconds. The test results are in the same app, o
 
 | What | Link |
 |---|---|
-| **Live app (start here: opens on the "Try it" tab)** | https://savepoint-demo.ksvhari007.workers.dev |
+| **Live app (opens on the Overview page)** | https://savepoint-demo.ksvhari007.workers.dev |
+| **Deep link straight into the experience** | https://savepoint-demo.ksvhari007.workers.dev/#/try |
+| Deep link to the 600 test runs | https://savepoint-demo.ksvhari007.workers.dev/#/results |
+| Deep link to the benchmark | https://savepoint-demo.ksvhari007.workers.dev/#/benchmark |
 | Same app on Hugging Face (static Space mirror) | https://huggingface.co/spaces/SrihariV/savepoint |
 | Code (GitHub, MIT licence, tag v1.0.0) | https://github.com/MayaDispeler/savepoint |
 
@@ -16,16 +19,20 @@ Use the Cloudflare link as the main "Live demo" button, the GitHub link as "Code
 
 ### What visitors see in the app
 
-- **Try it** (default): pick what goes wrong with an AI agent (it stops, types a wrong value, skips the last save, says
+The app has a left navigation with seven pages, written in plain language (technical terms are one click away).
+
+- **Overview**: the problem in two sentences, the save / check / undo flow, and a table of what the tests show.
+- **Try it**: pick what goes wrong with an AI agent (it stops, types a wrong value, skips the last save, says
   "done" too early), switch Savepoint on or off, press Play, and watch the record, the checkpoints, the failing check and
   the rollback. Every replay is a real recorded run, not an animation made up for the page.
-- **Test results**: all 600 runs as one grid, one tile each. Click a tile to see its steps, checks and the before/after screen.
-- **Benchmark**: pass^k curves, atomicity with confidence intervals, outcome tables, per app.
-- **Workflows**: the 30 written contracts (the rules each task is checked against).
+- **Test results**: all 600 runs as a grid, one tile each, with filters by app, protection level and wrong results only. Click a tile to see its steps, checks and the before/after screen.
+- **Benchmark**: how often a run ended clean, reliability over repeated attempts (pass^k), outcome counts, per app.
+- **Tasks and rules**: the 30 tasks and the written rules each one is checked against.
+- **How it works** and **Glossary and limits**: the explanation for engineers and the honest limits.
 
 ## 2. Recommended way to show it
 
-1. **Project card** on the projects page: title, one line, 3 tags, image `1-without-savepoint.png` or the video, and a
+1. **Project card** on the projects page: title, one line, 3 tags, image `2-try-without-savepoint.png` or the video, and a
    "Try it live" button to the Cloudflare link.
 2. **Case-study page** (`/projects/savepoint`, same pattern as your other project pages) with the text blocks in section 3,
    the images in section 5, and the same buttons.
@@ -104,11 +111,12 @@ and on OpenMRS to 96%, but only to 54% on iDempiere because of its UI timeouts.
 
 | File | Use it for |
 |---|---|
-| `1-without-savepoint.png` | Card image / hero: the agent says "done" but the record is wrong |
-| `2-with-savepoint.png` | The same failure caught and rolled back (use next to image 1, "before / after") |
-| `3-benchmark.png` | Benchmark section |
-| `4-600-test-results.png` | "All 600 runs" proof |
-| `savepoint-try-it-walkthrough.webm` | 45 second tour of the Try it tab (autoplay muted loop works well on the card) |
+| `2-try-without-savepoint.png` | Card image / hero: the agent says "done" but the record is wrong |
+| `3-try-with-savepoint.png` | The same failure caught and rolled back (use next to image 2, "before / after") |
+| `4-benchmark.png` | Benchmark section |
+| `5-test-results.png` | "All 600 runs" proof
+| `1-overview.png` | Overview page, if you want a wide product shot |
+| `savepoint-walkthrough.webm` | Short tour: Try it, test results, benchmark (autoplay muted loop works well on the card) |
 
 ## 6. Prompt for the Claude window that edits the portfolio
 
