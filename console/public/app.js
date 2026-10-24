@@ -22,7 +22,7 @@ const ARM_NAME = { B: "B baseline, no Savepoint", S: "S atomic", R: "R savepoint
 const pct = (x) => (x == null ? "n/a" : (x * 100).toFixed(1) + "%");
 const outcome = (r) => (r.sp_outcome === "rollback_failed" ? "RF" : r.oracle);
 const svg = (n) => `<svg viewBox="0 0 16 16" aria-hidden="true">${ICON[n]}</svg>`;
-const state = { view: "runs", runId: null };
+const state = { view: "try", runId: null };
 
 function tile(r) {
   const o = outcome(r), d = OUT[o];
@@ -45,7 +45,7 @@ function summary() {
 function viewRuns() {
   const wfs = [...new Set(B.runs.map((r) => r.workflow_id))].sort();
   const quarantined = B.runs.filter((r) => r.quarantined);
-  let h = `<div class="card"><h2>Runs</h2><p class="muted">Every run is one tile of the same size. Each tile has an icon and a word, so colour is never the only signal.</p><div class="hint">` +
+  let h = `<div class="card"><h2>Test results: all 600 runs</h2><p class="muted">Every run is one tile of the same size. Each tile has an icon and a word, so colour is never the only signal.</p><div class="hint">` +
     Object.entries(OUT).map(([k, d]) => `<div class="tile o-${k}" title="${esc(d.long)}">${svg(d.icon)}<span>${d.word}</span></div>`).join("") + "</div></div>";
   if (quarantined.length) {
     h += `<div class="card err"><h3>Quarantined (${quarantined.length})</h3><div class="grid" style="grid-template-columns:repeat(10,minmax(0,1fr))">${quarantined.map(tile).join("")}</div></div>`;
@@ -98,7 +98,7 @@ function viewRun(id) {
     } else rbHtml += `<p class="muted">Screenshots are kept for featured runs only.</p>`;
     rbHtml += `<p>Rows differ after restore: <b>${rb.rows_differ}</b> · ${rb.exact ? "exact" : "NOT exact"} · restore ${rb.restore_ms} ms · screen diff ${rb.pixel_diff_pct}%</p>`;
   }
-  return `<div class="card"><button id="back">← Runs</button>
+  return `<div class="card"><button id="back">← Test results</button>
     <h2 style="margin-top:12px">${esc(r.workflow_id)} · arm ${r.arm} · trial ${r.trial}</h2>
     <div class="hint"><div class="tile o-${o}">${svg(d.icon)}<span>${d.word}</span></div><div>${esc(d.long)}<br><span class="muted">fault: ${esc(r.fault)} · Savepoint: ${esc(r.sp_outcome.replace("_", " "))} · ${r.steps} steps · ${(r.wall_ms / 1000).toFixed(1)} s · model cost $${(r.cost_usd || 0).toFixed(2)}${r.retries ? ` · ${r.retries} retry` : ""}</span></div></div></div>
     <div class="card"><h3>Timeline</h3><ol class="tl" aria-label="Steps in reading order">${tl}</ol></div>
@@ -168,7 +168,9 @@ function render() {
     if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
   });
   const v = $("#view");
-  v.innerHTML = state.view === "run" ? viewRun(state.runId) : state.view === "benchmark" ? viewBenchmark() : state.view === "workflows" ? viewWorkflows() : viewRuns();
+  $("#summary").hidden = state.view === "try";
+  v.innerHTML = state.view === "try" ? viewTry() : state.view === "run" ? viewRun(state.runId) : state.view === "benchmark" ? viewBenchmark() : state.view === "workflows" ? viewWorkflows() : viewRuns();
+  if (state.view === "try") bindTry();
   v.querySelectorAll("[data-run]").forEach((b) => b.addEventListener("click", () => { state.view = "run"; state.runId = b.dataset.run; render(); window.scrollTo(0, 0); v.focus(); }));
   const back = $("#back"); if (back) back.addEventListener("click", () => { state.view = "runs"; render(); });
   const sl = $("#slider"); if (sl) sl.addEventListener("input", () => $("#cmp").style.setProperty("--pos", sl.value + "%"));

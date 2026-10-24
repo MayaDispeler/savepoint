@@ -57,3 +57,34 @@ svg.chart{width:100%;height:auto;display:block}
 .empty{padding:48px 0;text-align:center}
 .err{border-color:var(--red);background:var(--red-tint)}
 @media (prefers-reduced-motion:no-preference){.cmp .after,.cmp .bar{transition:none}}
+
+.hero p{max-width:78ch;margin:0 0 8px}
+.ctl{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:900px){.ctl{grid-template-columns:1fr}}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg-btn{height:auto;min-height:32px;padding:6px 12px;text-align:left}
+.seg-btn[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.ctl-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.rec{border:2px solid var(--ink);border-radius:8px;background:#fff;overflow:hidden}
+.rec-title{background:var(--ink);color:#fff;padding:6px 12px;font-weight:600;font-size:13px}
+.rec-row{display:flex;justify-content:space-between;gap:16px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.rec-row span{color:var(--muted)}
+.rec-row b{font-size:16px;text-align:right;overflow-wrap:anywhere}
+.rec-banner{min-height:36px;padding:8px 12px;background:var(--blue-tint);color:var(--blue);font-weight:600;font-size:13px}
+.rec-banner:empty{background:transparent}
+.flash{animation:flash 1.2s ease-out}
+@keyframes flash{from{background:var(--blue-tint);color:var(--blue)}to{background:transparent}}
+@media (prefers-reduced-motion:reduce){.flash{animation:none}}
+.ev{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;min-height:120px}
+.evi{display:grid;grid-template-columns:110px 1fr;gap:10px;align-items:start;padding:6px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;line-height:18px}
+.evw{font-weight:600;white-space:nowrap}
+.evi.cp{background:var(--blue-tint);border-color:var(--blue)}.evi.cp .evw,.evi.rs .evw,.evi.ok .evw{color:var(--blue)}
+.evi.rs{border-color:var(--blue)}
+.evi.bad{background:var(--red-tint);border-color:var(--red)}.evi.bad .evw{color:var(--red)}
+.shots summary{cursor:pointer;color:var(--blue);margin:8px 0}
+.shotgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.shotgrid figure{margin:0}.shotgrid img{width:100%;height:auto;border:1px solid var(--line);border-radius:8px;display:block}
+.shotgrid figcaption{font-size:12px;color:var(--muted);margin-top:4px}
+@media (max-width:700px){.shotgrid{grid-template-columns:1fr}.evi{grid-template-columns:1fr}}
+
+[hidden]{display:none!important}
