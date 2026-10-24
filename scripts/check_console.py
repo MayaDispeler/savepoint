@@ -25,6 +25,7 @@ def main():
             page.on("console", lambda m: m.type == "error" and errors.append(m.text))
             page.on("pageerror", lambda e: errors.append(str(e)))
             page.goto((ROOT / "index.html").as_uri())
+            page.click(".tab[data-view=runs]")
             page.wait_for_selector(".tile")
             sizes = page.eval_on_selector_all("#view .grid .tile", "els => [...new Set(els.map(e => e.offsetWidth+'x'+e.offsetHeight))]")
             r = {"tile_sizes": sizes, "inner_scrollers": page.evaluate(SCROLLERS),
