@@ -107,7 +107,7 @@ function viewRun(id) {
 
 function line(points, cls) { return points.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" "); }
 
-const APP_NAME = { claimdesk: "ClaimDesk 98 (synthetic claims app)", openmrs: "OpenMRS 2.12 (real hospital record system)", idempiere: "iDempiere 13 (real ERP)" };
+const APP_NAME = { claimdesk: "ClaimDesk 98 (synthetic claims app)", openmrs: "OpenMRS 2.12 (real hospital record system)", idempiere: "iDempiere (real ERP, Docker)" };
 function viewBenchmark() {
   const by = B.results.by_app || { all: B.results };
   return Object.entries(by).map(([app, R]) => benchApp(app, R)).join("");

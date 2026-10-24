@@ -1,4 +1,4 @@
-# iDempiere 13 + PostgreSQL 16, GardenWorld demo client. Sandbox only: default credentials (GardenAdmin / GardenAdmin).
+# iDempiere (image idempiereofficial/idempiere:13-release; its log reports 10.0.1) + PostgreSQL 16, GardenWorld demo client. Sandbox only: default credentials (GardenAdmin / GardenAdmin).
 # Host networking: container-to-container bridge traffic is blocked in GitHub Codespaces. Stop OpenMRS first (port 8080).
 services:
   postgres:
