@@ -61,7 +61,8 @@ function viewTry(query) {
   <section class="sect"><div class="ctl">
     <div class="field"><span class="label">Step 1. What goes wrong?</span><div class="seg" id="seg-fault" role="group" aria-label="What goes wrong">${seg(FAULTS, "fault")}</div><span class="hintline" id="hint-fault"></span></div>
     <div class="field"><span class="label">Step 2. Protection</span><div class="seg" id="seg-prot" role="group" aria-label="Protection">${seg(PROTECTION, "prot")}</div><span class="hintline" id="hint-prot"></span></div></div>
-    <div class="actions"><button type="button" class="btn primary" id="try-play">${icon("play", "s")} Play</button><button type="button" class="btn" id="try-skip">Skip to the end</button></div></section>
+    <div class="actions"><button type="button" class="btn primary" id="try-play">${icon("play", "s")} <span>Play</span></button><button type="button" class="btn" id="try-skip">Skip to the end</button><span class="hintline" id="try-status" aria-live="polite"></span></div></section>
+  <div id="try-anchor"></div>
   <section class="sect"><div class="two">
     <div><h2>The record</h2><p class="lede" style="margin-bottom:12px">What is stored in the app. It changes as the agent works.</p><div id="rec-wrap"></div></div>
     <div><h2>What happened</h2><p class="lede" style="margin-bottom:12px">Blue lines are Savepoint. Grey lines are the agent. Green and red lines are checks.</p><ol class="ev" id="ev" aria-live="polite"></ol></div></div></section>
@@ -114,6 +115,9 @@ function playTry(instant) {
   clearTimeout(tryState.timer);
   const token = ++tryState.token;
   const list = $("#ev"), wrap = $("#rec-wrap");
+  const label = $("#try-play span"), status = $("#try-status");
+  label.textContent = "Replaying…"; status.textContent = "Watch the record and the log below.";
+  if (!instant) $("#try-anchor").scrollIntoView({ behavior: "smooth", block: "start" });
   list.innerHTML = ""; $("#try-verdict").innerHTML = `<p class="muted" style="margin:0">Replaying…</p>`;
   wrap.innerHTML = recHtml(run.events[0].state, false, "Original record");
   const events = run.events.slice(1);
@@ -130,7 +134,7 @@ function playTry(instant) {
       wrap.innerHTML = recHtml(e.state, changed, banner); last = e.state;
       if (e.t === "restore") lastBanner = banner;
     }
-    if (e.t === "end") { wrap.innerHTML = recHtml(e.state, false, lastBanner); showVerdict(run); return; }
+    if (e.t === "end") { wrap.innerHTML = recHtml(e.state, false, lastBanner); showVerdict(run); label.textContent = "Play again"; status.textContent = "Done. Change a choice above, or play again."; return; }
     if (instant || reduce) step(); else tryState.timer = setTimeout(step, e.t === "check" || e.t === "restore" ? 1100 : 700);
   };
   step();
